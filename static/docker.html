@@ -350,7 +350,7 @@
                                 <div class="btn-group" role="group" aria-label="Action">
                                     <button type="button" class="btn btn-success" onclick="start('${container_data[i]['Id']}')">start</button>
                                     <button type="button" class="btn btn-warning" onclick="stop('${container_data[i]['Id']}')">stop</button>
-                                    <button type="button" class="btn btn-primary" onclick="">restart</button>
+                                    <button type="button" class="btn btn-primary" onclick="">restart('${container_data[i]['Id']}')</button>
                                     <button type="button" class="btn btn-danger" onclick="remove('${container_data[i]['Id']}')">remove</button>
                                     <button type="button" class="btn btn-primary" onclick="">scan</button>
                                     <button type="button" class="btn btn-primary" onclick="">sign</button>
@@ -395,6 +395,52 @@
         $.ajax({
             method: "POST",
             url: "/container/stop",
+            data: JSON.stringify({container_id: container_id}),
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data);
+                container();
+            },
+            beforeSend:function (){
+                $('.wrap-loading').removeClass('display-none');
+            },
+            complete:function(){
+                $('.wrap-loading').addClass('display-none');
+            },
+            error: function (request, status, error) {
+                console.log(request, status, error);
+            },
+            timeout:100000
+        });
+    }
+
+    function restart(container_id){
+        $.ajax({
+            method: "POST",
+            url: "/container/restart",
+            data: JSON.stringify({container_id: container_id}),
+            contentType: "application/json",
+            success: function (data) {
+                console.log(data);
+                container();
+            },
+            beforeSend:function (){
+                $('.wrap-loading').removeClass('display-none');
+            },
+            complete:function(){
+                $('.wrap-loading').addClass('display-none');
+            },
+            error: function (request, status, error) {
+                console.log(request, status, error);
+            },
+            timeout:100000
+        });
+    }
+
+    function remove(container_id) {
+        $.ajax({
+            method: "POST",
+            url: "/container/remove",
             data: JSON.stringify({container_id: container_id}),
             contentType: "application/json",
             success: function (data) {

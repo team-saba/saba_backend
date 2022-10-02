@@ -27,3 +27,17 @@ def stop_container(container_id):
         return None
     container.stop()
     return container
+
+def restart_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container.restart()
+    return container
+
+def delete_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container.remove()
+    return container
