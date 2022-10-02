@@ -35,7 +35,7 @@ def read_item(container: Container):
     container.restart()
     return container.attrs
 
-@router.post("/delete")
+@router.post("/remove")
 def read_item(container: Container):
     print(container.container_id)
     container = manage.delete_container(container.container_id)
