@@ -42,4 +42,4 @@ def read_item(container: Container):
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
     container.remove()
-    return container.attrs
+    return {"remove" :True}
