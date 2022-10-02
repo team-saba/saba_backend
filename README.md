@@ -1,30 +1,30 @@
 # saba_backend_ajax
 ```
 .
-├── dependencies.py 
-├── docker-compose.yml 
-├── Dockerfile
-├── entry.sh
+├── dependencies.py     # Dependency Injection
+├── docker-compose.yml  # Docker Compose
+├── Dockerfile          # Dockerfile
+├── entry.sh            # Entrypoint
 ├── __init__.py
-├── main.py
+├── main.py             # FastAPI
 ├── README.md
 ├── requirements.txt
-├── routers
-│   ├── container
-│   │     ├── container.py
+├── routers             # Routers Directory
+│   ├── container       # Docker Container Router Directory
+│   │     ├── container.py  # Docker Container Router
 │   │     └── __init__.py
 │   ├── __init__.py
-│   └── router.py
+│   └── router.py       # FastAPI Router
 │
-├── schemas
-│   ├── container_schema.py
+├── schemas             # Schemas Directory
+│   ├── container_schema.py # Docker Container Schema
 │   └── __init__.py
 │       
-├── service
-│   ├── container_service.py
+├── service             # Service Directory
+│   ├── container_service.py    # Docker Container Service
 │   └── __init__.py
 │   
-├── static
+├── static              # Static Directory (Frontend Temprary)
 │   ├── css
 │   │   └── 
 │   ├── index.html
