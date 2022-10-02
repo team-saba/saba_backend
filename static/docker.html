@@ -287,6 +287,13 @@
     console.log(body);
 
     let SERVER_ADDRESS = "//100.80.56.78:8000/"
+    let state_keys = {
+        "running" : '<p class=\"text-white bg-success\">실행</p>',
+        "exited" : '<p class=\"text-white bg-danger\">종료</p>',
+        "created" : "생성",
+        "restarting" : "재시작",
+        "paused" : "일시정지",
+    }
 
     function container() {
         var result_element = $('#result');
@@ -344,7 +351,7 @@
                                 <td>${container_data[i]['Name']}</td>
 <!--                                <td colspan="2"><i class="fa-solid fa-circle-check" style="color:#d33724;"></i></td>-->
                                 <td colspan="2"><i class="fa-solid fa-circle-xmark" style="color:#d33724;"></i></td>
-                                <td colspan="2">${container_data[i]['State']['Status']}</td>
+                                <td colspan="2">${state_keys[container_data[i]['State']['Status']]}</td>
                                 <td colspan="2">${container_data[i]['Config']['Image']}</td>
                                 <td colspan="2">
                                 <div class="btn-group" role="group" aria-label="Action">
