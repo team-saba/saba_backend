@@ -5,7 +5,11 @@ from starlette.responses import RedirectResponse
 
 from routers.router import api_router
 
-app = FastAPI()
+app = FastAPI(
+    title='Saba API',
+    description='BoB11기 프로젝트 Saba의 API 서버입니다.',
+    version='0.1.0',
+)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(api_router)
