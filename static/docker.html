@@ -286,7 +286,7 @@
     var body = $('body');
     console.log(body);
 
-    let SERVER_ADDRESS = "//100.80.56.78:8000/"
+    let SERVER_ADDRESS = "http://saba.seungwook.me/api"
     let state_keys = {
         "running" : '<p class=\"text-white bg-success\">실행</p>',
         "exited" : '<p class=\"text-white bg-danger\">종료</p>',
@@ -301,7 +301,7 @@
             result_element.empty();
             $.ajax({
                 method: "GET",
-                url: "/container",
+                url: SERVER_ADDRESS+"/container",
                 contentType: "application/json",
                 success: function (data) {
                     console.log(data);
@@ -378,7 +378,7 @@
     function start(container_id) {
         $.ajax({
             method: "POST",
-            url: "/container/start",
+            url: SERVER_ADDRESS + "/container/start",
             data: JSON.stringify({container_id: container_id}),
             contentType: "application/json",
             success: function (data) {
@@ -401,7 +401,7 @@
     function stop(container_id) {
         $.ajax({
             method: "POST",
-            url: "/container/stop",
+            url: SERVER_ADDRESS + "/container/stop",
             data: JSON.stringify({container_id: container_id}),
             contentType: "application/json",
             success: function (data) {
@@ -424,7 +424,7 @@
     function restart(container_id){
         $.ajax({
             method: "POST",
-            url: "/container/restart",
+            url: SERVER_ADDRESS + "/container/restart",
             data: JSON.stringify({container_id: container_id}),
             contentType: "application/json",
             success: function (data) {
@@ -447,7 +447,7 @@
     function remove(container_id) {
         $.ajax({
             method: "POST",
-            url: "/container/remove",
+            url: SERVER_ADDRESS + "/container/remove",
             data: JSON.stringify({container_id: container_id}),
             contentType: "application/json",
             success: function (data) {
