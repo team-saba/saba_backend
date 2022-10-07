@@ -9,4 +9,4 @@ COPY . .
 RUN pip install -r requirements.txt
 
 RUN chmod +x entry.sh
-ENTRYPOINT entry.sh
+ENTRYPOINT ./entry.sh
