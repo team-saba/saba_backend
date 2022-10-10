@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from schemas.container_schema import Container
+from schemas.container_schema import *
 import service.container_service as manage
 
 router = APIRouter()
@@ -43,3 +43,10 @@ def read_item(container: Container):
         raise HTTPException(status_code=404, detail="Container not found")
     container.remove()
     return {"remove" :True}
+
+@router.post("/exec")
+def exec_container(container: ContainerExec):
+    print(container.container_id)
+    print("command: " + container.command)
+    result = manage.exec_container(container.container_id, container.command)
+    return {"output": result}
