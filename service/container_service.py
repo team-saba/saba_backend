@@ -41,3 +41,12 @@ def delete_container(container_id):
         return None
     container.remove()
     return container
+
+def exec_container(container_id, command: str):
+    # in order to check weather container is present
+    container = get_container(container_id)
+    if container is None:
+        return None
+    result = client.api.exec_create(container_id, command)
+    return client.api.exec_start(result['Id'])
+
