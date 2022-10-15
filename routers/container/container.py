@@ -1,6 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+
 from schemas.container_schema import *
 import service.container_service as manage
+import service.exec_service as exec_manage
 
 router = APIRouter()
 
@@ -50,3 +53,21 @@ def exec_container(container: ContainerExec):
     print("command: " + container.command)
     result = manage.exec_container(container.container_id, container.command)
     return {"output": result}
+
+@router.websocket("/ws/{container_id}")
+async def websocket_endpoint(websocket: WebSocket, container_id: str):
+    exec_id = manage.exec_creat_container(container_id)
+    sock = manage.exec_start_container(exec_id)
+    data = sock.recv(2048)
+    send = exec_manage.threadSend(websocket, sock)
+    send.start()
+    await websocket.accept()
+    while True:
+        data = await websocket.receive_text()
+        if data == "close":
+            break
+        sock.send(data.encode('utf-8'))
+        # sock.send(data.encode())
+
+
+

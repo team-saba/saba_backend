@@ -1,6 +1,8 @@
 import docker
 
+
 client = docker.from_env()
+docketAPI = docker.APIClient()
 
 def print_list():
     containers = client.containers.list(all)
@@ -49,4 +51,24 @@ def exec_container(container_id, command: str):
         return None
     result = client.api.exec_create(container_id, command)
     return client.api.exec_start(result['Id'])
+
+def exec_creat_container(container_id):
+    execCommand = [
+        "/bin/sh",
+        "-c",
+        'TERM=xterm-256color; export TERM; [ -x /bin/bash ] && ([ -x /usr/bin/script ] && /usr/bin/script -q -c "/bin/bash" /dev/null || exec /bin/bash) || exec /bin/sh']
+    execOptions = {
+        "tty": True,
+        'stdout':True,
+        'stderr':True,
+        'stdin':True,
+    }
+    execId = client.api.exec_create(container_id, execCommand, **execOptions)
+    
+    return execId['Id']
+
+def exec_start_container(exec_id):
+    sock = client.api.exec_start(exec_id, tty=True, stream=True, socket=True ,demux=True)
+    client.api.exec_resize(exec_id,height=100,width=118)
+    return sock._sock
 
