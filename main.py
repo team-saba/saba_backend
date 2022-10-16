@@ -22,5 +22,9 @@ def server_checker():
 def root():
     return RedirectResponse(url='/static/index.html')
 
+@app.get("/console")
+def root():
+    return RedirectResponse(url='/static/console.html')
+
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8002)

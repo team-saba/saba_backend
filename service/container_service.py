@@ -68,7 +68,7 @@ def exec_creat_container(container_id):
     return execId['Id']
 
 def exec_start_container(exec_id):
-    sock = client.api.exec_start(exec_id, tty=True, stream=True, socket=True ,demux=True)
-    client.api.exec_resize(exec_id,height=100,width=118)
+    sock = client.api.exec_start(exec_id, tty=True, stream=True, socket=True)
+    # client.api.exec_resize(exec_id,height=100,width=100)
     return sock._sock
 

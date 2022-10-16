@@ -20,28 +20,44 @@
           href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.0.0/css/all.css">
-    <style type="text/css" >
-    .wrap-loading{ /*화면 전체를 어둡게 합니다.*/
-    position: fixed;
-    left:0;
-    right:0;
-    top:0;
-    bottom:0;
-    background: rgba(0,0,0,0.2); /*not in ie */
-    filter: progid:DXImageTransform.Microsoft.Gradient(startColorstr='#20000000', endColorstr='#20000000');
-    }
-    .wrap-loading div{ /*로딩 이미지*/
-    position: fixed;
-    top:50%;
-    left:50%;
-    margin-left: -21px;
-    margin-top: -21px;
-    }
-    .display-none{ /*감추기*/
-    display:none;
-    }
+    <style type="text/css">
+        .wrap-loading { /*화면 전체를 어둡게 합니다.*/
+            position: fixed;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2); /*not in ie */
+            filter: progid:DXImageTransform.Microsoft.Gradient(startColorstr='#20000000', endColorstr='#20000000');
+        }
 
-</style>
+        .wrap-loading div { /*로딩 이미지*/
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            margin-left: -21px;
+            margin-top: -21px;
+        }
+
+        .display-none { /*감추기*/
+            display: none;
+        }
+
+        .modal{
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            padding-top: 100px; /* Location of the box */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+    </style>
 
 </head>
 
@@ -275,8 +291,32 @@
 </div>
 <!-- ./wrapper -->
 <div class="wrap-loading display-none">
-<!--    <div><img src="/static/img/Loading_icon.gif"/></div>-->
+    <!--    <div><img src="/static/img/Loading_icon.gif"/></div>-->
     <div><img src="https://i.gifer.com/origin/34/34338d26023e5515f6cc8969aa027bca_w200.gif"/></div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label>이벤트</label>
+                    </div>
+                </form>
+            </div>
+            <div
+                    class="modal-footer">
+                <!--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+                <button type="button" class="btn btn-primary">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- <script src="dist/vendors.bundle.js"></script> -->
@@ -286,13 +326,13 @@
     var body = $('body');
     console.log(body);
 
-    let SERVER_ADDRESS = "http://saba.seungwook.me/api"
+    let SERVER_ADDRESS = "http://100.66.145.29:8002"
     let state_keys = {
-        "running" : '<p class=\"text-white bg-success\">실행</p>',
-        "exited" : '<p class=\"text-white bg-danger\">종료</p>',
-        "created" : "생성",
-        "restarting" : "재시작",
-        "paused" : "일시정지",
+        "running": '<p class=\"text-white bg-success\">실행</p>',
+        "exited": '<p class=\"text-white bg-danger\">종료</p>',
+        "created": "생성",
+        "restarting": "재시작",
+        "paused": "일시정지",
     }
 
     function container() {
@@ -301,7 +341,7 @@
             result_element.empty();
             $.ajax({
                 method: "GET",
-                url: SERVER_ADDRESS+"/container",
+                url: SERVER_ADDRESS + "/container",
                 contentType: "application/json",
                 success: function (data) {
                     console.log(data);
@@ -385,16 +425,16 @@
                 console.log(data);
                 container();
             },
-            beforeSend:function (){
+            beforeSend: function () {
                 $('.wrap-loading').removeClass('display-none');
             },
-            complete:function(){
+            complete: function () {
                 $('.wrap-loading').addClass('display-none');
             },
             error: function (request, status, error) {
                 console.log(request, status, error);
             },
-            timeout:100000
+            timeout: 100000
         });
     }
 
@@ -408,20 +448,20 @@
                 console.log(data);
                 container();
             },
-            beforeSend:function (){
+            beforeSend: function () {
                 $('.wrap-loading').removeClass('display-none');
             },
-            complete:function(){
+            complete: function () {
                 $('.wrap-loading').addClass('display-none');
             },
             error: function (request, status, error) {
                 console.log(request, status, error);
             },
-            timeout:100000
+            timeout: 100000
         });
     }
 
-    function restart(container_id){
+    function restart(container_id) {
         $.ajax({
             method: "POST",
             url: SERVER_ADDRESS + "/container/restart",
@@ -431,16 +471,16 @@
                 console.log(data);
                 container();
             },
-            beforeSend:function (){
+            beforeSend: function () {
                 $('.wrap-loading').removeClass('display-none');
             },
-            complete:function(){
+            complete: function () {
                 $('.wrap-loading').addClass('display-none');
             },
             error: function (request, status, error) {
                 console.log(request, status, error);
             },
-            timeout:100000
+            timeout: 100000
         });
     }
 
@@ -454,17 +494,17 @@
                 console.log(data);
                 container();
             },
-            beforeSend:function (){
+            beforeSend: function () {
                 $('.wrap-loading').removeClass('display-none');
             },
-            complete:function(){
+            complete: function () {
                 $('.wrap-loading').addClass('display-none');
                 container();
             },
             error: function (request, status, error) {
                 console.log(request, status, error);
             },
-            timeout:100000
+            timeout: 100000
         });
     }
 

@@ -7,7 +7,7 @@ var term,
     charHeight;
 var terminalContainer = document.getElementById('terminal-container');
 //var host = document.getElementById('host').value;
-var host = window.location.hostname + ':' + window.location.port + '/';
+var host = '100.66.145.29:8001';
 function setTerminalSize () {
   var cols = 128,
       rows = 24,
@@ -32,23 +32,24 @@ function createTerminal(host,containerId) {
     tabStopWidth: 8
   });
   term.open(terminalContainer);
-  //term.fit();
+  // term.fit();
   // socketURL = 'ws://100.73.35.8:2375/v1.24/containers/' + containerId + '/attach/ws?logs=0&stream=1&stdin=1&stdout=1&stderr=1';
   socketURL = 'ws://'+host+'/container/ws/'+containerId;
   console.log(socketURL)
   socket = new WebSocket(socketURL);
   socket.onopen = runRealTerminal;
-      socket.onclose = runFakeTerminal;
-      socket.onerror = runFakeTerminal;
-      socket.onmessage = function (e) {
-              console.log(e);
-              console.warn(e.data);
-  }
+  // socket.onclose = runFakeTerminal;
+  // socket.onerror = runFakeTerminal;
+  // socket.onmessage = function (e) {
+  //         console.log(e);
+  //         console.warn(e.data);
+  // }
 }
 function runRealTerminal() {
   term.attach(socket);
   term._initialized = true;
 }
+
 function runFakeTerminal() {
   if (term._initialized) {
     return;

@@ -3,7 +3,8 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 from schemas.container_schema import *
 import service.container_service as manage
-import service.exec_service as exec_manage
+
+import chardet
 
 router = APIRouter()
 
@@ -58,16 +59,54 @@ def exec_container(container: ContainerExec):
 async def websocket_endpoint(websocket: WebSocket, container_id: str):
     exec_id = manage.exec_creat_container(container_id)
     sock = manage.exec_start_container(exec_id)
-    data = sock.recv(2048)
-    send = exec_manage.threadSend(websocket, sock)
-    send.start()
+    # sock 타임아웃 지정
+    sock.settimeout(2)
     await websocket.accept()
+    # await websocket.send_text(sock.recv(2048).decode('utf-8'))
     while True:
+        print("recv 1")
         data = await websocket.receive_text()
-        if data == "close":
+        print("recv 2")
+        
+        if data == "\0":
+            print("recv 3")
+            # continue
+            
+        if data is not None:
+            print("data is not none")
+            sock.send(data.encode('utf-8'))
+        
+
+        print("docker stream stdout")
+        try:
+            dockerStreamStdout = sock.recv(2048)
+            print("dcker stream stdout 1")
+            
+            dockerStreamStdout = dockerStreamStdout.decode('utf-8')
+
+            if dockerStreamStdout is '?':
+                await websocket.send_text("")
+                continue
+
+            if dockerStreamStdout is not None:
+                print("dcker stream stdout is not none")
+                # encoding = chardet.detect(dockerStreamStdout).get('encoding')
+                print("websocket send text 1")
+                # await websocket.send_text(str(dockerStreamStdout, encoding=encoding or "utf-8"))
+                await websocket.send_text(dockerStreamStdout)
+                print("websocket send text 2")
+            else:
+                print("docker daemon socket is close")
+                await websocket.close()
+                sock.close()
+                break
+
+        except Exception as e:
+            print(e)
+            print("docker daemon socket is close")
+            await websocket.close()
+            sock.close()
             break
-        sock.send(data.encode('utf-8'))
-        # sock.send(data.encode())
 
-
+    print("websocket close")
 
