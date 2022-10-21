@@ -72,3 +72,33 @@ def exec_start_container(exec_id):
     # client.api.exec_resize(exec_id,height=100,width=100)
     return sock._sock
 
+
+
+# Required for CLI integration
+# Codes below will be ignored when this file is imported by others,
+# but will be work when solely executed as python script
+# 
+# Whenever a new funciton is added, be sure it is added in below
+#
+# Author: Ch1keen
+def help(argv):
+    help_string = "Usage: {} [COMMAND] [CONTAINER_ID]\n".format(argv[0])
+    help_string += """
+Available Commands:
+  list     List containers
+  start    Start a container
+  stop     Stop a container
+  restart  Restart a container
+  delete   Delete a container
+  help     Show this help
+    """
+
+    print(help_string)
+
+if __name__ == '__main__':
+    import sys
+
+    if len(sys.argv) == 1 or sys.argv[1] == "help":
+        help(sys.argv)
+
+
