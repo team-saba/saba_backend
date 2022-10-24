@@ -17,10 +17,16 @@ def scan_image(image: Image):
         raise HTTPException(status_code=404, detail="Image not found")
     return result
 
-# dockerhub search with search_dockerhub
 @router.post("/search")
 def search_image(keyword: Keyword):
     result = manage.search_dockerhub(keyword.key)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return result
+
+@router.post("/delete")
+def delete_image(image: Image):
+    result = manage.delete_image(image.image_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return result

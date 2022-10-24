@@ -54,7 +54,10 @@ def search_dockerhub(keyword):
     url = "https://hub.docker.com/api/content/v1/products/search?image_filter=official%2Cstore%2Copen_source&q={}".format(keyword)
     headers = {'Search-Version': 'v3'}
     response = requests.get(url, headers=headers)
-    return response.json()['summaries']
+    result = response.json()['summaries']
+    if len(result) == 0:
+        return None
+    return result
 
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
