@@ -101,4 +101,42 @@ if __name__ == '__main__':
     if len(sys.argv) == 1 or sys.argv[1] == "help":
         help(sys.argv)
 
+    elif sys.argv[1] == "list":
+        container_list = print_list()
+        print(container_list)
+    
+    elif sys.argv[1] == "start":
+        try:
+            result = start_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+
+    elif sys.argv[1] == "stop":
+        try:
+            result = stop_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+
+    elif sys.argv[1] == "restart":
+        try:
+            result = restart_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+
+    elif sys.argv[1] == "delete":
+        try:
+            result = delete_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+
+    else:
+        help(sys.argv)
 
