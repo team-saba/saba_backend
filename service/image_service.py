@@ -7,9 +7,9 @@ client = docker.from_env()
 
 def print_list():
     images = client.images.list()
-    images_josn = [image.attrs for image in images]
+    images_json = [image.attrs for image in images]
     images_result = []
-    for image in images_josn:
+    for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
             used = True
         else:
@@ -22,7 +22,7 @@ def print_list():
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
-                'used': used
+                'Used': used
             }
         )
     return images_result
