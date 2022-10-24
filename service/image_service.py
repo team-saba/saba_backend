@@ -51,10 +51,10 @@ def delete_image(image_id):
     return image
 
 def search_dockerhub(keyword):
-    url = "https://hub.docker.com/v2/search/repositories/?query={}".format(keyword)
+    url = "https://hub.docker.com/api/content/v1/products/search?image_filter=official%2Cstore%2Copen_source&q={}".format(keyword)
     headers = {'Search-Version': 'v3'}
     response = requests.get(url, headers=headers)
-    return response.json()
+    return response.json()['summaries']
 
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
