@@ -1,4 +1,7 @@
 # saba_backend_ajax
+
+## File Structure
+
 ```
 .
 ├── dependencies.py     # Dependency Injection
@@ -22,6 +25,7 @@
 │       
 ├── service             # Service Directory
 │   ├── container_service.py    # Docker Container Service
+│   ├── image_service.py        # Docker Image Service
 │   └── __init__.py
 │   
 ├── static              # Static Directory (Frontend Temprary)
@@ -33,6 +37,35 @@
 │   ├── package.json
 │   └── README.md
 ```
+
+## Using as independent Python script
+
+`/service` 디렉토리에 있는 파이썬 스크립트는 독립적으로 실행할 수 있습니다.
+
+* `service/container_service.py`
+
+* `service/image_service.py`
+
+### Dependency
+
+* [trivy](https://github.com/aquasecurity/trivy)
+
+  ```bash
+  brew install trivy
+
+  # if you use nix
+  nix-shell -p trivy
+  ```
+
+* docker
+
+  ```bash
+  python
+
+  # if you use Nix
+  nix-shell -p python310Packages.docker
+  ```
+
 
 ## Troubleshoot
 
@@ -74,3 +107,4 @@
     - ...
   ...
   ```
+
