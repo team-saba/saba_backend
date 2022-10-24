@@ -7,9 +7,9 @@ client = docker.from_env()
 
 def print_list():
     images = client.images.list()
-    images_josn = [image.attrs for image in images]
+    images_json = [image.attrs for image in images]
     images_result = []
-    for image in images_josn:
+    for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
             used = True
         else:
@@ -22,7 +22,7 @@ def print_list():
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
-                'used': used
+                'Used': used
             }
         )
     return images_result
@@ -51,10 +51,13 @@ def delete_image(image_id):
     return image
 
 def search_dockerhub(keyword):
-    url = "https://hub.docker.com/v2/search/repositories/?query={}".format(keyword)
+    url = "https://hub.docker.com/api/content/v1/products/search?image_filter=official%2Cstore%2Copen_source&q={}".format(keyword)
     headers = {'Search-Version': 'v3'}
     response = requests.get(url, headers=headers)
-    return response.json()
+    result = response.json()['summaries']
+    if len(result) == 0:
+        return None
+    return result
 
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
