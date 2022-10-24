@@ -19,7 +19,7 @@ def scan_image(image_id):
     image = get_image(image_id)
     if image is None:
         return None
-    scan_result = subprocess.run(["trivy", "image", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
+    scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
     return {'scan_result': json.loads(scan_result.stdout)}
 
 def delete_image(image_id):
