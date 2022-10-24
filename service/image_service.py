@@ -1,12 +1,31 @@
 import docker
 import subprocess
 import json
+import requests
 
 client = docker.from_env()
 
 def print_list():
     images = client.images.list()
-    return [image.attrs for image in images]
+    images_josn = [image.attrs for image in images]
+    images_result = []
+    for image in images_josn:
+        if image['Id'] in [container.image.id for container in client.containers.list()]:
+            used = True
+        else:
+            used = False
+
+        images_result.append(
+            {
+                'Id': image['Id'],
+                'RepoTags': image['RepoTags'][0],
+                'Created': image['Created'],
+                'Size': image['Size'],
+                'VirtualSize': image['VirtualSize'],
+                'used': used
+            }
+        )
+    return images_result
 
 def get_image(image_id):
     try:
@@ -31,6 +50,11 @@ def delete_image(image_id):
     client.images.remove(image_id)
     return image
 
+def search_dockerhub(keyword):
+    url = "https://hub.docker.com/v2/search/repositories/?query={}".format(keyword)
+    headers = {'Search-Version': 'v3'}
+    response = requests.get(url, headers=headers)
+    return response.json()
 
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
@@ -79,4 +103,3 @@ if __name__ == '__main__':
 
     else:
         help(sys.argv)
-
