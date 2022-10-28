@@ -30,3 +30,10 @@ def delete_image(image: Image):
     if result is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return result
+
+@router.post("/keygen")
+def key_gen():
+    result = manage.key_gen()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return result
