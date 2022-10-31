@@ -30,3 +30,19 @@ def delete_image(image: Image):
     if result is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return result
+
+@router.post("/signing_image")
+def signing_image(user_id: str, repo_name: str, image_tag: str):
+    result = manage.signing_image(user_id, repo_name, image_tag)
+    if result == "Not Login":
+        raise HTTPException(status_code=404, detail="Docker login fail")
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image signing fail")
+    return result
+
+@router.post("/verify_image")
+def verify_image(user_id: str, repo_name: str, image_tag: str):
+    result = manage.verify_image(user_id, repo_name, image_tag)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image verify fail")
+    return result

@@ -59,6 +59,12 @@ def search_dockerhub(keyword):
         return None
     return result
 
+def docker_login(id, pw):
+    login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
+    if login_result.returncode == 0:
+        return {'login_result': 1}
+    return None
+    
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
 # but will be work when solely executed as python script
@@ -76,6 +82,10 @@ Available Commands:
   help     Show this help
     """
 
+    print(help_string)
+    
+def help_login():
+    help_string = "Usage: login [COMMAND] [ID] [Password]\n"
     print(help_string)
 
 if __name__ == '__main__':
@@ -103,6 +113,14 @@ if __name__ == '__main__':
         except IndexError:
             print("Error: No IMAGE_ID was given\n")
             help(sys.argv)
-
+            
+        elif sys.argv[1] == "login":
+        try:
+            result = docker_login(sys.argv[2], sys.argv[3])
+            print(result)
+        except IndexError:
+            print("Error: No ID or  Password was given\n")
+            help_login()
+            
     else:
         help(sys.argv)
