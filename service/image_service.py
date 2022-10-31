@@ -60,10 +60,84 @@ def search_dockerhub(keyword):
         return None
     return result
 
+
+def docker_login(id, pw):
+    login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
+    if login_result.returncode == 0:
+        return {'login_result': 1}
+    return None
+
+def docker_login_check():
+    login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
+    if str(login_check_result).find("Username") == -1:
+        return 0
+    return 1
+
+def signing_image(user_id, repo_name, image_tag):
+    login_check_result = docker_login_check()
+    
+    if login_check_result == 0:
+        print("docker id: ")
+        id = input()
+        print("docker pw: ")
+        pw = input()
+        
+        result = docker_login(id, pw)
+        if result == None:
+            return "Login Fail"
+
+    signing_result = subprocess.run(
+        [
+            "cosign",
+            "sign",
+            "--key",
+            "../cosign.key",
+            user_id + "/" + repo_name + ":" + image_tag,
+        ],
+        stdout=subprocess.PIPE,
+    )
+    return {"signing_result": signing_result}
+
+def verify_image(user_id, repo_name, image_tag):
+    login_check_result = docker_login_check()
+
+    if login_check_result == 0:
+        print("docker id: ")
+        id = input()
+        print("docker pw: ")
+        pw = input()
+        
+        result = docker_login(id, pw)
+        if result == None:
+            return "Login Fail"
+
+    verify_result = subprocess.run(
+        [
+            "cosign",
+            "verify",
+            "--key",
+            "../cosign.pub",
+            user_id + "/" + repo_name + ":" + image_tag,
+        ],
+        stdout=subprocess.PIPE,
+    )
+
+    return {"verify_result": verify_result.returncode}
+
+    
+# Required for CLI integration
+# Codes below will be ignored when this file is imported by others,
+# but will be work when solely executed as python script
+# 
+# Whenever a new funciton is added, be sure it is added in below
+#
+# Author: Ch1keen
+
 # 키 생성
 def key_gen():
     subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
     return {'key_gen_result' : "cosign.pub"}
+
 
 def help(argv):
     help_string = "Usage: {} [COMMAND] [IMAGE_ID]\n".format(argv[0])
@@ -75,6 +149,18 @@ Available Commands:
   help     Show this help
     """
 
+    print(help_string)
+    
+def help_login():
+    help_string = "Usage: login [USER_ID] [PASSWORD]\n"
+    print(help_string)
+    
+def help_sign():
+    help_string = "Usage: sign [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
+    print(help_string)
+    
+def help_verify():
+    help_string = "Usage: verify [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
     print(help_string)
 
 if __name__ == '__main__':
@@ -102,11 +188,35 @@ if __name__ == '__main__':
         except IndexError:
             print("Error: No IMAGE_ID was given\n")
             help(sys.argv)
+            
+    elif sys.argv[1] == "login":
+        try:
+            result = docker_login(sys.argv[2], sys.argv[3])
+            print(result)
+        except IndexError:
+            help_login()
+    
+    elif sys.argv[1] == "sign":
+        try:
+            result = signing_image(sys.argv[2], sys.argv[3], sys.argv[4])
+            print(result)
+        except IndexError:
+            help_sign()
+            
+    elif sys.argv[1] == "verify":
+        try:
+            result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
+            print(result)
+        except IndexError:
+            help_verify()
+            
+
     elif sys.argv[1] == "keygen":
         try:
             result = key_gen(sys.argv[2])
             print(result)
         except IndexError:
             print("Error")
+
     else:
         help(sys.argv)
