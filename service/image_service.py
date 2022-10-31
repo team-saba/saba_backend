@@ -95,6 +95,33 @@ def signing_image(user_id, repo_name, image_tag):
         stdout=subprocess.PIPE,
     )
     return {"signing_result": signing_result}
+
+def verify_image(user_id, repo_name, image_tag):
+    login_check_result = docker_login_check()
+
+    if login_check_result == 0:
+        print("docker id: ")
+        id = input()
+        print("docker pw: ")
+        pw = input()
+        
+        result = docker_login(id, pw)
+        if result == None:
+            return "Login Fail"
+
+    verify_result = subprocess.run(
+        [
+            "cosign",
+            "verify",
+            "--key",
+            "../cosign.pub",
+            user_id + "/" + repo_name + ":" + image_tag,
+        ],
+        stdout=subprocess.PIPE,
+    )
+
+    return {"verify_result": verify_result.returncode}
+
     
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
@@ -121,6 +148,10 @@ def help_login():
     
 def help_sign():
     help_string = "Usage: sign [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
+    print(help_string)
+    
+def help_verify():
+    help_string = "Usage: verify [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
     print(help_string)
 
 if __name__ == '__main__':
@@ -161,8 +192,14 @@ if __name__ == '__main__':
             result = signing_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            print("Error: No ID or Password was given\n")
             help_sign()
+            
+    elif sys.argv[1] == "verify":
+        try:
+            result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
+            print(result)
+        except IndexError:
+            help_verify()
             
     else:
         help(sys.argv)
