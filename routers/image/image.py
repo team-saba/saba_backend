@@ -55,3 +55,11 @@ def verify_image(user_id: str, repo_name: str, image_tag: str):
     if result is None:
         raise HTTPException(status_code=404, detail="Image verify fail")
     return result
+
+@router.post("/keygen")
+def key_gen():
+    result = manage.key_gen()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image not found")
+    return result
+

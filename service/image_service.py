@@ -2,6 +2,7 @@ import docker
 import subprocess
 import json
 import requests
+import os.path
 
 client = docker.from_env()
 
@@ -58,6 +59,7 @@ def search_dockerhub(keyword):
     if len(result) == 0:
         return None
     return result
+
 
 def docker_login(id, pw):
     login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
@@ -130,6 +132,13 @@ def verify_image(user_id, repo_name, image_tag):
 # Whenever a new funciton is added, be sure it is added in below
 #
 # Author: Ch1keen
+
+# 키 생성
+def key_gen():
+    subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
+    return {'key_gen_result' : "cosign.pub"}
+
+
 def help(argv):
     help_string = "Usage: {} [COMMAND] [IMAGE_ID]\n".format(argv[0])
     help_string += """
@@ -201,5 +210,13 @@ if __name__ == '__main__':
         except IndexError:
             help_verify()
             
+
+    elif sys.argv[1] == "keygen":
+        try:
+            result = key_gen(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error")
+
     else:
         help(sys.argv)
