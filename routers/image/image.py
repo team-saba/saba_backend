@@ -37,3 +37,12 @@ def docker_login(id: str, pw: str):
     if result is None:
         raise HTTPException(status_code=404, detail="Docker login fail")
     return result
+
+@router.post("/signing_image")
+def signing_image(user_id: str, repo_name: str, image_tag: str):
+    result = manage.signing_image(user_id, repo_name, image_tag)
+    if result == "Login Fail":
+        raise HTTPException(status_code=404, detail="Docker login fail")
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image signing fail")
+    return result

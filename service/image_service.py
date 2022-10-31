@@ -70,6 +70,31 @@ def docker_login_check():
     if str(login_check_result).find("Username") == -1:
         return 0
     return 1
+
+def signing_image(user_id, repo_name, image_tag):
+    login_check_result = docker_login_check()
+    
+    if login_check_result == 0:
+        print("docker id: ")
+        id = input()
+        print("docker pw: ")
+        pw = input()
+        
+        result = docker_login(id, pw)
+        if result == None:
+            return "Login Fail"
+
+    signing_result = subprocess.run(
+        [
+            "cosign",
+            "sign",
+            "--key",
+            "../cosign.key",
+            user_id + "/" + repo_name + ":" + image_tag,
+        ],
+        stdout=subprocess.PIPE,
+    )
+    return {"signing_result": signing_result}
     
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
@@ -91,7 +116,11 @@ Available Commands:
     print(help_string)
     
 def help_login():
-    help_string = "Usage: login [COMMAND] [ID] [Password]\n"
+    help_string = "Usage: login [USER_ID] [PASSWORD]\n"
+    print(help_string)
+    
+def help_sign():
+    help_string = "Usage: sign [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
     print(help_string)
 
 if __name__ == '__main__':
@@ -120,13 +149,20 @@ if __name__ == '__main__':
             print("Error: No IMAGE_ID was given\n")
             help(sys.argv)
             
-        elif sys.argv[1] == "login":
+    elif sys.argv[1] == "login":
         try:
             result = docker_login(sys.argv[2], sys.argv[3])
             print(result)
         except IndexError:
-            print("Error: No ID or Password was given\n")
             help_login()
+    
+    elif sys.argv[1] == "sign":
+        try:
+            result = signing_image(sys.argv[2], sys.argv[3], sys.argv[4])
+            print(result)
+        except IndexError:
+            print("Error: No ID or Password was given\n")
+            help_sign()
             
     else:
         help(sys.argv)
