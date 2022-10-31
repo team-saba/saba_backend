@@ -50,6 +50,8 @@ def signing_image(user_id: str, repo_name: str, image_tag: str):
 @router.post("/verify_image")
 def verify_image(user_id: str, repo_name: str, image_tag: str):
     result = manage.verify_image(user_id, repo_name, image_tag)
+    if result == "Login Fail":
+        raise HTTPException(status_code=404, detail="Docker login fail")
     if result is None:
         raise HTTPException(status_code=404, detail="Image verify fail")
     return result
