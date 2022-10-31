@@ -64,6 +64,12 @@ def docker_login(id, pw):
     if login_result.returncode == 0:
         return {'login_result': 1}
     return None
+
+def docker_login_check():
+    login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
+    if str(login_check_result).find("Username") == -1:
+        return 0
+    return 1
     
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
@@ -119,7 +125,7 @@ if __name__ == '__main__':
             result = docker_login(sys.argv[2], sys.argv[3])
             print(result)
         except IndexError:
-            print("Error: No ID or  Password was given\n")
+            print("Error: No ID or Password was given\n")
             help_login()
             
     else:
