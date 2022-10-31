@@ -2,6 +2,7 @@ import docker
 import subprocess
 import json
 import requests
+import os.path
 
 client = docker.from_env()
 
@@ -59,13 +60,11 @@ def search_dockerhub(keyword):
         return None
     return result
 
-# Required for CLI integration
-# Codes below will be ignored when this file is imported by others,
-# but will be work when solely executed as python script
-# 
-# Whenever a new funciton is added, be sure it is added in below
-#
-# Author: Ch1keen
+# 키 생성
+def key_gen():
+    subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
+    return {'key_gen_result' : "cosign.pub"}
+
 def help(argv):
     help_string = "Usage: {} [COMMAND] [IMAGE_ID]\n".format(argv[0])
     help_string += """
@@ -103,6 +102,11 @@ if __name__ == '__main__':
         except IndexError:
             print("Error: No IMAGE_ID was given\n")
             help(sys.argv)
-
+    elif sys.argv[1] == "keygen":
+        try:
+            result = key_gen(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error")
     else:
         help(sys.argv)
