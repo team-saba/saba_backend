@@ -62,12 +62,8 @@ def search_dockerhub(keyword):
 
 # 키 생성
 def key_gen():
-    key_gen_result = subprocess.run(["cosign","generate-key-pair"],stdout=subprocess.PIPE)
-    #key_gen_parsed = json.loads(key_gen_result.stdout)['Results']
-    #password : ubnutu
-
-    return {'key_gen_result' : key_gen_parsed}
-
+    subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
+    return {'key_gen_result' : "cosign.pub"}
 
 def help(argv):
     help_string = "Usage: {} [COMMAND] [IMAGE_ID]\n".format(argv[0])
