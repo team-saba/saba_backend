@@ -39,8 +39,8 @@ def docker_login(id: str, pw: str):
     return result
 
 @router.post("/signing_image")
-def signing_image(user_id: str, repo_name: str, image_tag: str):
-    result = manage.signing_image(user_id, repo_name, image_tag)
+def signing_image(user_id: str, repo_name: str, image_tag: str, password: str):
+    result = manage.signing_image(user_id, repo_name, image_tag, password)
     if result == "Login Fail":
         raise HTTPException(status_code=404, detail="Docker login fail")
     if result is None:
@@ -48,8 +48,8 @@ def signing_image(user_id: str, repo_name: str, image_tag: str):
     return result
 
 @router.post("/verify_image")
-def verify_image(user_id: str, repo_name: str, image_tag: str):
-    result = manage.verify_image(user_id, repo_name, image_tag)
+def verify_image(user_id: str, repo_name: str, image_tag: str, password: str):
+    result = manage.verify_image(user_id, repo_name, image_tag, password)
     if result == "Login Fail":
         raise HTTPException(status_code=404, detail="Docker login fail")
     if result is None:
@@ -57,9 +57,8 @@ def verify_image(user_id: str, repo_name: str, image_tag: str):
     return result
 
 @router.post("/keygen")
-def key_gen():
-    result = manage.key_gen()
+def key_gen(password: str):
+    result = manage.key_gen(password)
     if result is None:
         raise HTTPException(status_code=404, detail="Image not found")
     return result
-
