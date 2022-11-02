@@ -135,7 +135,9 @@ def verify_image(user_id, repo_name, image_tag):
 
 # 키 생성
 def key_gen():
-    subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
+    if os.path.isfile("./cosign.pub"):
+        return "KEY is exist."
+    subprocess.run(["cosign","generate-key-pair"],stdout=subprocess.PIPE)
     return {'key_gen_result' : "cosign.pub"}
 
 
