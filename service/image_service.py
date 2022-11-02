@@ -12,6 +12,7 @@ dotenv_file = dotenv.find_dotenv()
 
 client = docker.from_env()
 
+
 def print_list():
     images = client.images.list()
     images_json = [image.attrs for image in images]
