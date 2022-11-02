@@ -67,7 +67,6 @@ def search_dockerhub(keyword):
         return None
     return result
 
-
 def docker_login(id, pw):
     login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
     if login_result.returncode == 0:

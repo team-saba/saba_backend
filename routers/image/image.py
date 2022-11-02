@@ -4,7 +4,6 @@ import service.image_service as manage
 
 router = APIRouter()
 
-
 @router.get("/")
 def read_item():
     images_json = manage.print_list()
