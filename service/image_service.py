@@ -6,7 +6,7 @@ import os.path
 import dotenv
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 dotenv_file = dotenv.find_dotenv()
 
@@ -86,6 +86,7 @@ def docker_login_check():
     return {'login_check_result': 1}
 
 def signing_image(user_id, repo_name, image_tag, password):
+    print("base dir:", BASE_DIR)
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     
     signing_result = subprocess.run(
