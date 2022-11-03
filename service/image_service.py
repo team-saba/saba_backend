@@ -238,5 +238,12 @@ if __name__ == '__main__':
         except IndexError:
             print("Error")
 
+    elif sys.argv[1] == "keydel":
+        try:
+            result = key_del(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error")
+
     else:
         help(sys.argv)
