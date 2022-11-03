@@ -3,8 +3,15 @@ import subprocess
 import json
 import requests
 import os.path
+import dotenv
+from dotenv import load_dotenv
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
+dotenv_file = dotenv.find_dotenv()
 
 client = docker.from_env()
+
 
 def print_list():
     images = client.images.list()
@@ -60,7 +67,6 @@ def search_dockerhub(keyword):
         return None
     return result
 
-
 def docker_login(id, pw):
     login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
     if login_result.returncode == 0:
@@ -73,19 +79,21 @@ def docker_login_check():
         return 0
     return 1
 
-def signing_image(user_id, repo_name, image_tag):
-    login_check_result = docker_login_check()
+def signing_image(user_id, repo_name, image_tag, password):
+    # login_check_result = docker_login_check()
     
-    if login_check_result == 0:
-        print("docker id: ")
-        id = input()
-        print("docker pw: ")
-        pw = input()
+    # if login_check_result == 0:
+    #     print("docker id: ")
+    #     id = input()
+    #     print("docker pw: ")
+    #     pw = input()
         
-        result = docker_login(id, pw)
-        if result == None:
-            return "Login Fail"
+    #     result = docker_login(id, pw)
+    #     if result == None:
+    #         return "Login Fail"
 
+    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
+    
     signing_result = subprocess.run(
         [
             "cosign",
@@ -98,19 +106,21 @@ def signing_image(user_id, repo_name, image_tag):
     )
     return {"signing_result": signing_result}
 
-def verify_image(user_id, repo_name, image_tag):
-    login_check_result = docker_login_check()
+def verify_image(user_id, repo_name, image_tag, password):
+    # login_check_result = docker_login_check()
 
-    if login_check_result == 0:
-        print("docker id: ")
-        id = input()
-        print("docker pw: ")
-        pw = input()
+    # if login_check_result == 0:
+    #     print("docker id: ")
+    #     id = input()
+    #     print("docker pw: ")
+    #     pw = input()
         
-        result = docker_login(id, pw)
-        if result == None:
-            return "Login Fail"
+    #     result = docker_login(id, pw)
+    #     if result == None:
+    #         return "Login Fail"
 
+    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
+    
     verify_result = subprocess.run(
         [
             "cosign",
@@ -134,8 +144,11 @@ def verify_image(user_id, repo_name, image_tag):
 # Author: Ch1keen
 
 # 키 생성
-def key_gen():
-    subprocess.run(["sudo","cosign","generate-key-pair"],stdout=subprocess.PIPE)
+def key_gen(password):
+    if os.path.isfile("./cosign.pub"):
+        return "KEY is exist."
+    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
+    subprocess.run(["cosign","generate-key-pair"],stdout=subprocess.PIPE)
     return {'key_gen_result' : "cosign.pub"}
 
 
