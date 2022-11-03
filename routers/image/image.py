@@ -38,6 +38,13 @@ def docker_login(id: str, pw: str):
         raise HTTPException(status_code=404, detail="Docker login fail")
     return result
 
+@router.post("/docker_logout")
+def docker_logout():
+    result = manage.docker_logout()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Docker logout fail")
+    return result
+    
 @router.post("/signing_image")
 def signing_image(user_id: str, repo_name: str, image_tag: str, password: str):
     result = manage.signing_image(user_id, repo_name, image_tag, password)

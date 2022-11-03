@@ -73,6 +73,12 @@ def docker_login(id, pw):
         return {'login_result': 1}
     return None
 
+def docker_logout():
+    logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
+    if logout_result.returncode == 0:
+        return {'logout_result': 1}
+    return None
+
 def docker_login_check():
     login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
     if str(login_check_result).find("Username") == -1:
@@ -80,26 +86,14 @@ def docker_login_check():
     return 1
 
 def signing_image(user_id, repo_name, image_tag, password):
-    # login_check_result = docker_login_check()
-    
-    # if login_check_result == 0:
-    #     print("docker id: ")
-    #     id = input()
-    #     print("docker pw: ")
-    #     pw = input()
-        
-    #     result = docker_login(id, pw)
-    #     if result == None:
-    #         return "Login Fail"
-
-    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
+    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     
     signing_result = subprocess.run(
         [
             "cosign",
             "sign",
             "--key",
-            "../cosign.key",
+            "cosign.key",
             user_id + "/" + repo_name + ":" + image_tag,
         ],
         stdout=subprocess.PIPE,
@@ -119,14 +113,14 @@ def verify_image(user_id, repo_name, image_tag, password):
     #     if result == None:
     #         return "Login Fail"
 
-    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
+    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     
     verify_result = subprocess.run(
         [
             "cosign",
             "verify",
             "--key",
-            "../cosign.pub",
+            "cosign.pub",
             user_id + "/" + repo_name + ":" + image_tag,
         ],
         stdout=subprocess.PIPE,
@@ -143,7 +137,6 @@ def verify_image(user_id, repo_name, image_tag, password):
 #
 # Author: Ch1keen
 
-# 키 생성
 def key_gen(password):
     if os.path.isfile("./cosign.pub"):
         return "KEY is exist."
@@ -208,6 +201,11 @@ if __name__ == '__main__':
             print(result)
         except IndexError:
             help_login()
+            
+    elif sys.argv[1] == "logout":
+        result = docker_logout()
+        print(result)
+        
     
     elif sys.argv[1] == "sign":
         try:
@@ -221,8 +219,7 @@ if __name__ == '__main__':
             result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            help_verify()
-            
+            help_verify()       
 
     elif sys.argv[1] == "keygen":
         try:
