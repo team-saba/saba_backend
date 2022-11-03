@@ -99,7 +99,7 @@ def signing_image(user_id, repo_name, image_tag, password):
             "cosign",
             "sign",
             "--key",
-            "../cosign.key",
+            "cosign.key",
             user_id + "/" + repo_name + ":" + image_tag,
         ],
         stdout=subprocess.PIPE,
