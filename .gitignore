@@ -4,5 +4,5 @@
 /.vscode
 *.pyc
 .env
-/cosign.key
-/cosign.pub
+/cosign.*
+/service/.env
