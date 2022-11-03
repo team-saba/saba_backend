@@ -69,19 +69,25 @@ def search_dockerhub(keyword):
 
 def docker_login(id, pw):
     login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
-    if login_result.returncode == 0:
-        return login_result
-    return None
+    if login_result.returncode != 0:
+        return None
+    return login_result
 
 def docker_logout():
     logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
-    if logout_result.returncode == 0:
-        return logout_result
-    return None
+    if logout_result.returncode != 0:
+        return None
+    return logout_result
 
 def docker_login_check():
     login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
     if str(login_check_result).find("Username") == -1:
+        return 0
+    return 1
+
+def docker_login_id_check(user_id):
+    id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
+    if str(id_check_result).find("Username: "+user_id) == -1:
         return 0
     return 1
 
@@ -99,9 +105,9 @@ def signing_image(user_id, repo_name, image_tag, password):
         stdout=subprocess.PIPE,
     )
     
-    if signing_result.returncode == 0:
-        return signing_result
-    return None
+    if signing_result.returncode != 0:
+        return None
+    return signing_result
 
 def verify_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
@@ -117,9 +123,9 @@ def verify_image(user_id, repo_name, image_tag, password):
         stdout=subprocess.PIPE,
     )
     
-    if verify_result.returncode == 0:
-        return verify_result
-    return None
+    if verify_result.returncode != 0:
+        return None
+    return verify_result
 
     
 # Required for CLI integration

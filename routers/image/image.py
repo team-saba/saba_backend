@@ -49,6 +49,11 @@ def docker_logout():
 def docker_login_check():
     result = manage.docker_login_check()
     return result
+
+@router.post("/docker_login_id_check")
+def docker_login_id_check(user_id: str):
+    result = manage.docker_login_id_check(user_id)
+    return result
     
 @router.post("/signing_image")
 def signing_image(user_id: str, repo_name: str, image_tag: str, password: str):
