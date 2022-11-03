@@ -80,19 +80,19 @@ def docker_login_check():
     return 1
 
 def signing_image(user_id, repo_name, image_tag, password):
-    login_check_result = docker_login_check()
+    # login_check_result = docker_login_check()
     
-    if login_check_result == 0:
-        print("docker id: ")
-        id = input()
-        print("docker pw: ")
-        pw = input()
+    # if login_check_result == 0:
+    #     print("docker id: ")
+    #     id = input()
+    #     print("docker pw: ")
+    #     pw = input()
         
-        result = docker_login(id, pw)
-        if result == None:
-            return "Login Fail"
+    #     result = docker_login(id, pw)
+    #     if result == None:
+    #         return "Login Fail"
 
-    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
+    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
     
     signing_result = subprocess.run(
         [
@@ -107,19 +107,19 @@ def signing_image(user_id, repo_name, image_tag, password):
     return {"signing_result": signing_result}
 
 def verify_image(user_id, repo_name, image_tag, password):
-    login_check_result = docker_login_check()
+    # login_check_result = docker_login_check()
 
-    if login_check_result == 0:
-        print("docker id: ")
-        id = input()
-        print("docker pw: ")
-        pw = input()
+    # if login_check_result == 0:
+    #     print("docker id: ")
+    #     id = input()
+    #     print("docker pw: ")
+    #     pw = input()
         
-        result = docker_login(id, pw)
-        if result == None:
-            return "Login Fail"
+    #     result = docker_login(id, pw)
+    #     if result == None:
+    #         return "Login Fail"
 
-    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
+    dotenv.set_key(dotenv_file, "export COSIGN_PASSWORD", str(password))
     
     verify_result = subprocess.run(
         [
@@ -147,7 +147,6 @@ def verify_image(user_id, repo_name, image_tag, password):
 def key_gen(password):
     if os.path.isfile("./cosign.pub"):
         return "KEY is exist."
-    #print("password:", password)
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     subprocess.run(["cosign","generate-key-pair"],stdout=subprocess.PIPE)
     return {'key_gen_result' : "cosign.pub"}
