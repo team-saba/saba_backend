@@ -82,8 +82,8 @@ def docker_logout():
 def docker_login_check():
     login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
     if str(login_check_result).find("Username") == -1:
-        return 0
-    return 1
+        return {'login_check_result': 0}
+    return {'login_check_result': 1}
 
 def signing_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
@@ -98,21 +98,12 @@ def signing_image(user_id, repo_name, image_tag, password):
         ],
         stdout=subprocess.PIPE,
     )
-    return {"signing_result": signing_result}
+    
+    if signing_result.returncode == 0:
+        return {'signing_result': 1}
+    return {'signing_result': 0}
 
 def verify_image(user_id, repo_name, image_tag, password):
-    # login_check_result = docker_login_check()
-
-    # if login_check_result == 0:
-    #     print("docker id: ")
-    #     id = input()
-    #     print("docker pw: ")
-    #     pw = input()
-        
-    #     result = docker_login(id, pw)
-    #     if result == None:
-    #         return "Login Fail"
-
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     
     verify_result = subprocess.run(
@@ -125,8 +116,10 @@ def verify_image(user_id, repo_name, image_tag, password):
         ],
         stdout=subprocess.PIPE,
     )
-
-    return {"verify_result": verify_result.returncode}
+    
+    if verify_result.returncode == 0:
+        return {'verify_result': 1}
+    return {'verify_result': 0}
 
     
 # Required for CLI integration
