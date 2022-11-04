@@ -56,6 +56,8 @@
   # if you use nix
   nix-shell -p trivy
   ```
+  
+  For Nix package manager users, it is recommended to use **unstable** nixpkgs channel (See [issue #016](https://github.com/team-saba/saba_backend_ajax/issues/16))
 
 * docker
 
