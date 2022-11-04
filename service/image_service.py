@@ -7,7 +7,7 @@ import dotenv
 from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, ".env"))
+load_dotenv(os.path.join(BASE_DIR, "../.env"))
 dotenv_file = dotenv.find_dotenv()
 
 client = docker.from_env()
@@ -80,6 +80,9 @@ def docker_login_check():
     return 1
 
 def signing_image(user_id, repo_name, image_tag, password):
+    #cosign 키 없으면 예외처리
+    if not os.path.isfile("./cosign.key") and not os.path.isfile("./cosign.pub"):
+        return "No key here. You have to make SIGNING KEY. "
     # login_check_result = docker_login_check()
     
     # if login_check_result == 0:
@@ -107,6 +110,9 @@ def signing_image(user_id, repo_name, image_tag, password):
     return {"signing_result": signing_result}
 
 def verify_image(user_id, repo_name, image_tag, password):
+    #cosign 키 없으면 예외처리
+    if not os.path.isfile("./cosign.key") and not os.path.isfile("./cosign.pub"):
+        return "No key here. You have to make VERIFYING KEY. "
     # login_check_result = docker_login_check()
 
     # if login_check_result == 0:
@@ -133,15 +139,6 @@ def verify_image(user_id, repo_name, image_tag, password):
     )
 
     return {"verify_result": verify_result.returncode}
-
-    
-# Required for CLI integration
-# Codes below will be ignored when this file is imported by others,
-# but will be work when solely executed as python script
-# 
-# Whenever a new funciton is added, be sure it is added in below
-#
-# Author: Ch1keen
 
 # 키 생성
 def key_gen(password):
