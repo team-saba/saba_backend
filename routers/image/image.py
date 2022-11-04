@@ -77,6 +77,12 @@ def verify_image(user_id: str, repo_name: str, image_tag: str, password: str):
 def key_gen(password: str):
     result = manage.key_gen(password)
     if result is None:
-        raise HTTPException(status_code=404, detail="Image not found")
+        raise HTTPException(status_code=404, detail="Key does not found")
     return result
 
+@router.post("/keydel")
+def key_del(password: str):
+    result = manage.key_del(password)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Key not found")
+    return result

@@ -137,12 +137,19 @@ def verify_image(user_id, repo_name, image_tag, password):
 # Author: Ch1keen
 
 def key_gen(password):
-    if os.path.isfile("./cosign.pub"):
-        return "KEY is exist."
+    if os.path.isfile("./cosign.key") and os.path.isfile("./cosign.pub"):
+        return "COSIGN KEY is exist."
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-    subprocess.run(["cosign","generate-key-pair"],stdout=subprocess.PIPE)
-    return {'key_gen_result' : "cosign.pub"}
+    subprocess.run(["cosign", "generate-key-pair"], stdout=subprocess.PIPE)
+    return {'key_gen_result': "cosign.pub"}
 
+# 키 삭제
+def key_del(password):
+    if not os.path.isfile("./cosign.key") and not os.path.isfile("./cosign.pub"):
+        return "COSIGN KEY is not exist"
+    os.remove("./cosign.key")
+    os.remove("./cosign.pub")
+    return {'key_del result' : 'cosign key is deleted'}
 
 def help(argv):
     help_string = "Usage: {} [COMMAND] [IMAGE_ID]\n".format(argv[0])
