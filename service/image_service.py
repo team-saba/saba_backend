@@ -68,8 +68,9 @@ def search_dockerhub(keyword):
     return result
 
 def docker_login(id, pw):
-    login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
-    if login_result.returncode != 0:
+    try:
+        login_result = client.login(username=id, password=pw, reauth=True)
+    except docker.errors.APIError:
         return None
     return login_result
 
@@ -80,10 +81,10 @@ def docker_logout():
     return logout_result
 
 def docker_login_check():
-    login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
-    if str(login_check_result).find("Username") == -1:
-        return 0
-    return 1
+    login_check_result = client.info()
+    # if str(login_check_result).find("Username") == -1:
+    #     return 0
+    return login_check_result
 
 def docker_login_id_check(user_id):
     id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
