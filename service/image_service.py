@@ -19,14 +19,15 @@ def print_list():
     images_result = []
     for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
-            used = True
+            used = "True"
         else:
-            used = False
+            used = "False"
 
         images_result.append(
             {
-                'Id': image['Id'],
-                'RepoTags': image['RepoTags'][0],
+                'id': images_json.index(image),
+                'Name': image['Id'],
+                'RepoTags': image['RepoTags'],
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
@@ -48,7 +49,7 @@ def scan_image(image_id):
         return None
     scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
     scan_result_parsed = json.loads(scan_result.stdout)['Results']
-    return {'scan_result': scan_result_parsed}
+    return {'scan_result': scan_result_parsed[0]['Vulnerabilities']}
 
 def delete_image(image_id):
     #TODO: delete_image
