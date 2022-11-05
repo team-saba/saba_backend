@@ -65,6 +65,13 @@ def resume_container(container_id):
     container.unpause()
     return container
 
+def rename_container(container_id, new_name):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container.rename(new_name)
+    return container
+
 def exec_container(container_id, command: str):
     # in order to check weather container is present
     container = get_container(container_id)
@@ -103,7 +110,10 @@ def exec_start_container(exec_id):
 #
 # Author: Ch1keen
 def help(argv):
-    help_string = "Usage: {} [COMMAND] [CONTAINER_ID]\n".format(argv[0])
+    if argv[1] == "rename":
+        help_string = "Usage: {} [COMMAND] [CONTAINER_ID] [NEW_NAME]\n".format(argv[0])
+    else:
+        help_string = "Usage: {} [COMMAND] [CONTAINER_ID]\n".format(argv[0])
     help_string += """
 Available Commands:
   list     List containers
@@ -114,6 +124,7 @@ Available Commands:
   kill     Kill a container
   pasue    Pause a container
   resume   Resume a container
+  rename   Rename a container
   help     Show this help
     """
 
@@ -183,6 +194,14 @@ if __name__ == '__main__':
             print(result)
         except IndexError:
             print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+            
+    elif sys.argv[1] == "rename":
+        try:
+            result = rename_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID or NEW_NAME was given\n")
             help(sys.argv)
 
     else:

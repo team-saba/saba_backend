@@ -49,7 +49,7 @@ def read_item(container: Container):
     return {"remove" :True}
 
 @router.post("/kill")
-def read_item(container: Container):
+def kill_container(container: Container):
     print(container.container_id)
     container = manage.kill_container(container.container_id)
     if container is None:
@@ -57,7 +57,7 @@ def read_item(container: Container):
     return {"kill" :True}
 
 @router.post("/pause")
-def read_item(container: Container):
+def pause_container(container: Container):
     print(container.container_id)
     container = manage.pause_container(container.container_id)
     if container is None:
@@ -65,12 +65,20 @@ def read_item(container: Container):
     return {"pause" :True}
 
 @router.post("/resume")
-def read_item(container: Container):
+def resume_container(container: Container):
     print(container.container_id)
     container = manage.resume_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
     return {"resume" :True}
+
+@router.post("/rename")
+def rename_container(container: Container, new_name: str):
+    print(container.container_id)
+    container = manage.rename_container(container.container_id, new_name)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"rename" :True}
 
 @router.post("/exec")
 def exec_container(container: ContainerExec):
