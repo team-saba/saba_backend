@@ -1,13 +1,13 @@
 version: "3.7"
 services:
   saba:
-    image: seungwook0417/saba:latest
+    image: test/saba:latest
     container_name: saba
-#    build: .
+    build: .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - .:/app
     ports:
-     - "8000:8000"
+     - "8002:8002"
     env_file:
       - .env

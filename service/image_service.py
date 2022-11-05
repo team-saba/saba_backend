@@ -19,14 +19,15 @@ def print_list():
     images_result = []
     for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
-            used = True
+            used = "True"
         else:
-            used = False
+            used = "False"
 
         images_result.append(
             {
-                'Id': image['Id'],
-                'RepoTags': image['RepoTags'][0],
+                'id': images_json.index(image),
+                'Name': image['Id'],
+                'RepoTags': image['RepoTags'],
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
