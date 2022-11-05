@@ -51,6 +51,13 @@ def kill_container(container_id):
     container.kill()
     return container
 
+def pause_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container.pause()
+    return container
+
 def exec_container(container_id, command: str):
     # in order to check weather container is present
     container = get_container(container_id)
@@ -98,6 +105,7 @@ Available Commands:
   restart  Restart a container
   delete   Delete a container
   kill     Kill a container
+  pasue    Pause a container
   help     Show this help
     """
 
@@ -148,6 +156,14 @@ if __name__ == '__main__':
     elif sys.argv[1] == "kill":
         try:
             result = kill_container(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
+            
+    elif sys.argv[1] == "pause":
+        try:
+            result = pause_container(sys.argv[2])
             print(result)
         except IndexError:
             print("Error: No CONTAINER_ID was given\n")

@@ -56,6 +56,14 @@ def read_item(container: Container):
         raise HTTPException(status_code=404, detail="Container not found")
     return {"kill" :True}
 
+@router.post("/pause")
+def read_item(container: Container):
+    print(container.container_id)
+    container = manage.pause_container(container.container_id)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"pause" :True}
+
 @router.post("/exec")
 def exec_container(container: ContainerExec):
     print(container.container_id)
