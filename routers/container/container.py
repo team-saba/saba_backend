@@ -27,7 +27,7 @@ def read_item(container: Container):
     container = manage.stop_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.stop()
+    # container.stop()
     return container.attrs
 
 @router.post("/restart")
@@ -36,7 +36,7 @@ def read_item(container: Container):
     container = manage.restart_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.restart()
+    # container.restart()
     return container.attrs
 
 @router.post("/remove")
@@ -45,7 +45,7 @@ def read_item(container: Container):
     container = manage.delete_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.remove()
+    # container.remove()
     return {"remove" :True}
 
 @router.post("/kill")
