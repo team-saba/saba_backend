@@ -8,7 +8,6 @@ from DTO.VulnerabilityQueue import VulnerabilityQueue
 import service.image_service as manage
 
 class ReservationWorker:
-
     request_count = 0
     quota_gi_jun_time: datetime.datetime = datetime.datetime.now()
     MINIMUM_DELAY = 0.5
@@ -19,6 +18,7 @@ class ReservationWorker:
 
     def __init__(self):
         self.worker_status = diskcache.Cache(directory="./cache/worker_status")
+        self.scan_result = diskcache.Cache(directory="./cache/scan_result")
         pass
 
     def write_worker_status(self):
@@ -66,14 +66,13 @@ class ReservationWorker:
 
         # 예약 요청 처리
         try:
-            # reservation_ticket = manage.scan_image(
-            #     image_id=reservation.imageId
-            # )
+            reservation_ticket = manage.scan_image(
+                image_id=reservation.imageId
+            )
             # 예약 완료 처리
-            reservation_ticket = self.worker_status.get('request_count', retry=True)
-            print(reservation_ticket)
             reservation.result = reservation_ticket
             logging.info(f"처리 완료: {reservation.result}")
+            self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
 
             # 결과값 DB 저장
 
