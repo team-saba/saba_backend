@@ -2,6 +2,7 @@ import datetime
 import logging
 import os
 import asyncio
+import time
 
 import diskcache
 from DTO.VulnerabilityQueue import VulnerabilityQueue
@@ -69,6 +70,7 @@ class ReservationWorker:
             reservation_ticket = manage.scan_image(
                 image_id=reservation.imageId
             )
+            # reservation_ticket = "test"
             # 예약 완료 처리
             reservation.result = reservation_ticket
             logging.info(f"처리 완료: {reservation.result}")
