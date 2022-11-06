@@ -17,6 +17,7 @@ def scan_image(image: Image):
         raise HTTPException(status_code=404, detail="Image not found")
     return result
 
+# dockerhub search
 @router.post("/search")
 def search_image(keyword: Keyword):
     result = manage.search_dockerhub(keyword.key)
