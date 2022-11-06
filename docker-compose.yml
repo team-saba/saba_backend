@@ -3,7 +3,7 @@ services:
   saba:
     image: seungwook0417/saba:latest
     container_name: saba
-#    build: .
+    build: .
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - .:/app

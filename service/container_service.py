@@ -5,7 +5,7 @@ client = docker.from_env()
 docketAPI = docker.APIClient()
 
 def print_list():
-    containers = client.containers.list(all)
+    containers = client.containers.list(5)
     containers = [container.attrs for container in containers]
     return containers
 
