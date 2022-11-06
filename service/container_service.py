@@ -6,8 +6,17 @@ docketAPI = docker.APIClient()
 
 def print_list():
     containers = client.containers.list(all)
-    containers = [container.attrs for container in containers]
-    return containers
+    containers_json = [container.id for container in containers]
+    containers_result=[]
+    for container in containers_json:
+        containers_result.append(
+            {
+                'id': containers_json.index(containers),
+                'Name': container['Id'],
+                'Created Time' : container['Created']
+            }
+        ) 
+    return containers_result
 
 def get_container(container_id):
     try:
@@ -42,34 +51,6 @@ def delete_container(container_id):
     if container is None:
         return None
     container.remove()
-    return container
-
-def kill_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    container.kill()
-    return container
-
-def pause_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    container.pause()
-    return container
-
-def resume_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    container.unpause()
-    return container
-
-def rename_container(container_id, new_name):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    container.rename(new_name)
     return container
 
 def exec_container(container_id, command: str):
@@ -110,10 +91,7 @@ def exec_start_container(exec_id):
 #
 # Author: Ch1keen
 def help(argv):
-    if argv[1] == "rename":
-        help_string = "Usage: {} [COMMAND] [CONTAINER_ID] [NEW_NAME]\n".format(argv[0])
-    else:
-        help_string = "Usage: {} [COMMAND] [CONTAINER_ID]\n".format(argv[0])
+    help_string = "Usage: {} [COMMAND] [CONTAINER_ID]\n".format(argv[0])
     help_string += """
 Available Commands:
   list     List containers
@@ -121,10 +99,6 @@ Available Commands:
   stop     Stop a container
   restart  Restart a container
   delete   Delete a container
-  kill     Kill a container
-  pasue    Pause a container
-  resume   Resume a container
-  rename   Rename a container
   help     Show this help
     """
 
@@ -170,38 +144,6 @@ if __name__ == '__main__':
             print(result)
         except IndexError:
             print("Error: No CONTAINER_ID was given\n")
-            help(sys.argv)
-            
-    elif sys.argv[1] == "kill":
-        try:
-            result = kill_container(sys.argv[2])
-            print(result)
-        except IndexError:
-            print("Error: No CONTAINER_ID was given\n")
-            help(sys.argv)
-            
-    elif sys.argv[1] == "pause":
-        try:
-            result = pause_container(sys.argv[2])
-            print(result)
-        except IndexError:
-            print("Error: No CONTAINER_ID was given\n")
-            help(sys.argv)
-            
-    elif sys.argv[1] == "resume":
-        try:
-            result = resume_container(sys.argv[2])
-            print(result)
-        except IndexError:
-            print("Error: No CONTAINER_ID was given\n")
-            help(sys.argv)
-            
-    elif sys.argv[1] == "rename":
-        try:
-            result = rename_container(sys.argv[2])
-            print(result)
-        except IndexError:
-            print("Error: No CONTAINER_ID or NEW_NAME was given\n")
             help(sys.argv)
 
     else:
