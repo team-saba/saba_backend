@@ -13,6 +13,14 @@ def read_item():
     containers_json = manage.print_list()
     return {"containers" :containers_json}
 
+@router.post("/printlog")
+def print_log(container: Container):
+    #print(container.container_id)
+    container = manage.print_log(container.container_id)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return container.attrs
+
 @router.post("/start")
 def start_container(container: Container):
     print(container.container_id)

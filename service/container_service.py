@@ -1,5 +1,5 @@
 import docker
-
+import json
 
 client = docker.from_env()
 docketAPI = docker.APIClient()
@@ -12,16 +12,14 @@ def print_list():
         containers_result.append(
             {
                 'id' : containers_json.index(container),
-                'Name' : container['Id'],
+                'CONTAINER_ID' : container['Id'],
                 'Created Time' : container['Created'],
                 'Status' : container['State']['Status'],
                 'Image' : container['Image']
+
             }
         )
     return containers_result
-
-
-
 
 def get_container(container_id):
     try:
@@ -30,13 +28,14 @@ def get_container(container_id):
         return None
     return container
 
-# def print_log(container_id):
-#     container = get_container(container_id)
-#     if container is None:
-#         return None
-#     container_log_result=[]
-#     for container_log in con
-    
+def print_log(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container_log_result=[]
+    container_log_result=container.attrs['State']['Health']
+    return container_log_result
+
 def start_container(container_id):
     container = get_container(container_id)
     if container is None:
@@ -125,6 +124,14 @@ if __name__ == '__main__':
     elif sys.argv[1] == "list":
         container_list = print_list()
         print(container_list)
+
+    elif sys.argvs[1] == "printlog":
+        try:
+            result = print_log(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
     
     elif sys.argv[1] == "start":
         try:
