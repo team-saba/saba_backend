@@ -19,14 +19,15 @@ def print_list():
     images_result = []
     for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
-            used = True
+            used = "True"
         else:
-            used = False
+            used = "False"
 
         images_result.append(
             {
-                'Id': image['Id'],
-                'RepoTags': image['RepoTags'][0],
+                'id': images_json.index(image),
+                'Name': image['Id'],
+                'RepoTags': image['RepoTags'],
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
@@ -48,7 +49,7 @@ def scan_image(image_id):
         return None
     scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
     scan_result_parsed = json.loads(scan_result.stdout)['Results']
-    return {'scan_result': scan_result_parsed}
+    return {'scan_result': scan_result_parsed[0]['Vulnerabilities']}
 
 def delete_image(image_id):
     #TODO: delete_image
@@ -68,21 +69,31 @@ def search_dockerhub(keyword):
     return result
 
 def docker_login(id, pw):
-    login_result = subprocess.run(["docker", "login", "-u", id, "-p", pw], stdout=subprocess.PIPE)
-    if login_result.returncode == 0:
-        return {'login_result': 1}
-    return None
+    try:
+        login_result = client.login(username=id, password=pw, reauth=True)
+    except docker.errors.APIError:
+        return None
+    return login_result
+
+def docker_logout():
+    logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
+    if logout_result.returncode != 0:
+        return None
+    return logout_result
 
 def docker_login_check():
-    login_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
-    if str(login_check_result).find("Username") == -1:
+    login_check_result = client.info()
+    # if str(login_check_result).find("Username") == -1:
+    #     return 0
+    return login_check_result
+
+def docker_login_id_check(user_id):
+    id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
+    if str(id_check_result).find("Username: "+user_id) == -1:
         return 0
     return 1
 
 def signing_image(user_id, repo_name, image_tag, password):
-    #cosign 키 없으면 예외처리
-    if not os.path.isfile("./cosign.key") and not os.path.isfile("./cosign.pub"):
-        return "No key here. You have to make SIGNING KEY. "
     # login_check_result = docker_login_check()
     
     # if login_check_result == 0:
@@ -107,12 +118,12 @@ def signing_image(user_id, repo_name, image_tag, password):
         ],
         stdout=subprocess.PIPE,
     )
-    return {"signing_result": signing_result}
+    
+    if signing_result.returncode != 0:
+        return None
+    return signing_result
 
 def verify_image(user_id, repo_name, image_tag, password):
-    #cosign 키 없으면 예외처리
-    if not os.path.isfile("./cosign.key") and not os.path.isfile("./cosign.pub"):
-        return "No key here. You have to make VERIFYING KEY. "
     # login_check_result = docker_login_check()
 
     # if login_check_result == 0:
@@ -139,6 +150,15 @@ def verify_image(user_id, repo_name, image_tag, password):
     )
 
     return {"verify_result": verify_result.returncode}
+
+    
+# Required for CLI integration
+# Codes below will be ignored when this file is imported by others,
+# but will be work when solely executed as python script
+# 
+# Whenever a new funciton is added, be sure it is added in below
+#
+# Author: Ch1keen
 
 # 키 생성
 def key_gen(password):
@@ -212,6 +232,11 @@ if __name__ == '__main__':
             print(result)
         except IndexError:
             help_login()
+            
+    elif sys.argv[1] == "logout":
+        result = docker_logout()
+        print(result)
+        
     
     elif sys.argv[1] == "sign":
         try:
@@ -225,8 +250,7 @@ if __name__ == '__main__':
             result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            help_verify()
-            
+            help_verify()       
 
     elif sys.argv[1] == "keygen":
         try:

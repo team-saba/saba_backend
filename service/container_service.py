@@ -5,9 +5,19 @@ client = docker.from_env()
 docketAPI = docker.APIClient()
 
 def print_list():
-    containers = client.containers.list(5)
-    containers = [container.attrs for container in containers]
-    return containers
+    containers = client.containers.list(all)
+    containers_json = [container.id for container in containers]
+    containers_result=[]
+    for container in containers_json:
+        containers_result.append(
+            {
+                'id': containers_json.index(containers),
+                'Name': container['Id'],
+                'Created Time' : container['Created']
+            }
+        ) 
+    return containers_result
+
 
 def get_container(container_id):
     try:
