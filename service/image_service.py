@@ -166,7 +166,7 @@ def key_gen(password):
         return "COSIGN KEY is exist."
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     subprocess.run(["cosign", "generate-key-pair"], stdout=subprocess.PIPE)
-    return {'key_gen_result': "cosign.pub"}
+    return {'key_gen_result': open("cosign.pub","r").read()}
 
 # 키 삭제
 def key_del(password):
