@@ -4,6 +4,12 @@ import json
 client = docker.from_env()
 docketAPI = docker.APIClient()
 
+#컨테이너 리스트 보기위한 test code 
+def test_container_list():
+    containers = client.containers.list(all)
+    containers = [container.attrs for container in containers]
+    return containers
+
 def print_list():
     containers = client.containers.list(all)
     containers_json = [container.attrs for container in containers]
@@ -15,6 +21,8 @@ def print_list():
                 'CONTAINER_ID' : container['Id'],
                 'Created Time' : container['Created'],
                 'Status' : container['State']['Status'],
+                'IPAddress' : container['NetworkSettings']['IPAddress'],
+                'Port' : container['NetworkSettings']['Ports'], 
                 'Image' : container['Image']
 
             }
@@ -120,6 +128,11 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 1 or sys.argv[1] == "help":
         help(sys.argv)
+
+    #테스트 코드
+    elif sys.argv[1] == "test_list":
+        container_test_list = test_container_list()
+        print(container_test_list)
 
     elif sys.argv[1] == "list":
         container_list = print_list()
