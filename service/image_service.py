@@ -77,8 +77,6 @@ def docker_login(id, pw):
 
 def docker_logout():
     logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
-    if logout_result.returncode != 0:
-        return None
     return logout_result
 
 def docker_login_check():
