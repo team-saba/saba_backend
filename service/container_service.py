@@ -1,12 +1,11 @@
 import docker
 
-
 client = docker.from_env()
 docketAPI = docker.APIClient()
 
 def print_list():
-    containers = client.containers.list(all)
-    containers_json = [container.id for container in containers]
+    containers = client.containers.list()
+    containers_json = [container.attrs for container in containers]
     containers_result=[]
     for container in containers_json:
         containers_result.append(
