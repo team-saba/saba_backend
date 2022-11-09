@@ -15,11 +15,11 @@ def read_item():
 
 @router.post("/printlog")
 def print_log(container: Container):
-    #print(container.container_id)
-    container = manage.print_log(container.container_id)
+    print(container.container_id)
+    result = manage.print_log(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    return container.attrs
+    return result
 
 @router.post("/start")
 def start_container(container: Container):
