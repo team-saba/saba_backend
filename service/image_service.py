@@ -129,21 +129,13 @@ def verify_image(user_id, repo_name, image_tag, password):
         return None
     return verify_result
 
-    
-# Required for CLI integration
-# Codes below will be ignored when this file is imported by others,
-# but will be work when solely executed as python script
-# 
-# Whenever a new funciton is added, be sure it is added in below
-#
-# Author: Ch1keen
-
 def key_gen(password):
     if os.path.isfile("./cosign.key") and os.path.isfile("./cosign.pub"):
         return "COSIGN KEY is exist."
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     subprocess.run(["cosign", "generate-key-pair"], stdout=subprocess.PIPE)
-    return {'key_gen_result': "cosign.pub"}
+    cosign_key_data = open("cosign.pub","r").read()
+    return {'key_gen_result': cosign_key_data}
 
 # 키 삭제
 def key_del(password):
@@ -232,6 +224,13 @@ if __name__ == '__main__':
     elif sys.argv[1] == "keygen":
         try:
             result = key_gen(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error")
+
+    elif sys.argv[1] == "keydel":
+        try:
+            result = key_del(sys.argv[2])
             print(result)
         except IndexError:
             print("Error")

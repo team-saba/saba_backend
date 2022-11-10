@@ -17,6 +17,8 @@
 │   │     ├── container.py  # Docker Container Router
 │   │     └── __init__.py
 │   ├── __init__.py
+|   ├── iamge           
+│   │     └── image.py  
 │   └── router.py       # FastAPI Router
 │
 ├── schemas             # Schemas Directory

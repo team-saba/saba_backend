@@ -1,10 +1,11 @@
 import docker
-
+import json
 
 client = docker.from_env()
 docketAPI = docker.APIClient()
 
-def print_list():
+#컨테이너 리스트 보기위한 test code 
+def test_container_list():
     containers = client.containers.list(all)
     containers_json = [container.id for container in containers]
     containers_result=[]
@@ -18,12 +19,39 @@ def print_list():
         ) 
     return containers_result
 
+def print_list():
+    containers = client.containers.list(all)
+    containers_json = [container.attrs for container in containers]
+    containers_result=[]
+    for container in containers_json:
+        containers_result.append(
+            {
+                'idx' : containers_json.index(container),
+                'CONTAINER_ID' : container['Id'],
+                'Created Time' : container['Created'],
+                'Status' : container['State']['Status'],
+                'IPAddress' : container['NetworkSettings']['IPAddress'],
+                'Port' : container['NetworkSettings']['Ports'], 
+                'Image' : container['Image']
+
+            }
+        )
+    return containers_result
+
 def get_container(container_id):
     try:
         container = client.containers.get(container_id)
     except docker.errors.NotFound:
         return None
     return container
+
+def print_log(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container_log_result=[]
+    container_log_result=container.attrs['State']['Health']['Log']
+    return container_log_result
 
 def start_container(container_id):
     container = get_container(container_id)
@@ -110,9 +138,22 @@ if __name__ == '__main__':
     if len(sys.argv) == 1 or sys.argv[1] == "help":
         help(sys.argv)
 
+    #테스트 코드
+    elif sys.argv[1] == "test_list":
+        container_test_list = test_container_list()
+        print(container_test_list)
+
     elif sys.argv[1] == "list":
         container_list = print_list()
         print(container_list)
+
+    elif sys.argvs[1] == "printlog":
+        try:
+            result = print_log(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
     
     elif sys.argv[1] == "start":
         try:
