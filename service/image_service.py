@@ -95,7 +95,7 @@ def docker_login_id_check(user_id):
 
 def signing_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-    
+
     signing_result = subprocess.run(
         [
             "cosign",
@@ -106,14 +106,14 @@ def signing_image(user_id, repo_name, image_tag, password):
         ],
         stdout=subprocess.PIPE,
     )
-    
+
     if signing_result.returncode != 0:
         return None
     return signing_result
 
 def verify_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-    
+
     verify_result = subprocess.run(
         [
             "cosign",
@@ -124,16 +124,16 @@ def verify_image(user_id, repo_name, image_tag, password):
         ],
         stdout=subprocess.PIPE,
     )
-    
+
     if verify_result.returncode != 0:
         return None
     return verify_result
 
-    
+
 # Required for CLI integration
 # Codes below will be ignored when this file is imported by others,
 # but will be work when solely executed as python script
-# 
+#
 # Whenever a new funciton is added, be sure it is added in below
 #
 # Author: Ch1keen
@@ -164,15 +164,15 @@ Available Commands:
     """
 
     print(help_string)
-    
+
 def help_login():
     help_string = "Usage: login [USER_ID] [PASSWORD]\n"
     print(help_string)
-    
+
 def help_sign():
     help_string = "Usage: sign [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
     print(help_string)
-    
+
 def help_verify():
     help_string = "Usage: verify [USER_ID] [REPOSITORY_NAME], [IMAGE_TAG]"
     print(help_string)
@@ -186,7 +186,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == "list":
         image_list = print_list()
         print(image_list)
-    
+
     elif sys.argv[1] == "scan":
         try:
             result = scan_image(sys.argv[2])
@@ -202,32 +202,32 @@ if __name__ == '__main__':
         except IndexError:
             print("Error: No IMAGE_ID was given\n")
             help(sys.argv)
-            
+
     elif sys.argv[1] == "login":
         try:
             result = docker_login(sys.argv[2], sys.argv[3])
             print(result)
         except IndexError:
             help_login()
-            
+
     elif sys.argv[1] == "logout":
         result = docker_logout()
         print(result)
-        
-    
+
+
     elif sys.argv[1] == "sign":
         try:
             result = signing_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
             help_sign()
-            
+
     elif sys.argv[1] == "verify":
         try:
             result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            help_verify()       
+            help_verify()
 
     elif sys.argv[1] == "keygen":
         try:
