@@ -17,7 +17,7 @@ def print_list():
     for container in containers_json:
         containers_result.append(
             {
-                'id' : containers_json.index(container),
+                'idx' : containers_json.index(container),
                 'CONTAINER_ID' : container['Id'],
                 'Created Time' : container['Created'],
                 'Status' : container['State']['Status'],
