@@ -3,6 +3,5 @@
 /__pycache__
 /.vscode
 *.pyc
-.env
+/.env
 /cosign.*
-/service/.env
