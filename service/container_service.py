@@ -7,17 +7,8 @@ docketAPI = docker.APIClient()
 #컨테이너 리스트 보기위한 test code 
 def test_container_list():
     containers = client.containers.list(all)
-    containers_json = [container.id for container in containers]
-    containers_result=[]
-    for container in containers_json:
-        containers_result.append(
-            {
-                'id': containers_json.index(containers),
-                'Name': container['Id'],
-                'Created Time' : container['Created']
-            }
-        ) 
-    return containers_result
+    containers = [container.attrs for container in containers]
+    return containers
 
 def print_list():
     containers = client.containers.list(all)
