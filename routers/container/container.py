@@ -41,7 +41,7 @@ def read_item(container: Container):
     container = manage.stop_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.stop()
+    # container.stop()
     return container.attrs
 
 @router.post("/restart")
@@ -50,7 +50,7 @@ def read_item(container: Container):
     container = manage.restart_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.restart()
+    # container.restart()
     return container.attrs
 
 @router.post("/remove")
@@ -59,8 +59,40 @@ def read_item(container: Container):
     container = manage.delete_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
-    container.remove()
+    # container.remove()
     return {"remove" :True}
+
+@router.post("/kill")
+def kill_container(container: Container):
+    print(container.container_id)
+    container = manage.kill_container(container.container_id)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"kill" :True}
+
+@router.post("/pause")
+def pause_container(container: Container):
+    print(container.container_id)
+    container = manage.pause_container(container.container_id)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"pause" :True}
+
+@router.post("/resume")
+def resume_container(container: Container):
+    print(container.container_id)
+    container = manage.resume_container(container.container_id)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"resume" :True}
+
+@router.post("/rename")
+def rename_container(container: Container, new_name: str):
+    print(container.container_id)
+    container = manage.rename_container(container.container_id, new_name)
+    if container is None:
+        raise HTTPException(status_code=404, detail="Container not found")
+    return {"rename" :True}
 
 @router.post("/exec")
 def exec_container(container: ContainerExec):

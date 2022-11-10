@@ -17,6 +17,7 @@ def scan_image(image: Image):
         raise HTTPException(status_code=404, detail="Image not found")
     return result
 
+# dockerhub search
 @router.post("/search")
 def search_image(keyword: Keyword):
     result = manage.search_dockerhub(keyword.key)
@@ -38,6 +39,23 @@ def docker_login(id: str, pw: str):
         raise HTTPException(status_code=404, detail="Docker login fail")
     return result
 
+@router.post("/docker_logout")
+def docker_logout():
+    result = manage.docker_logout()
+    if result is None:
+        raise HTTPException(status_code=404, detail="Docker logout fail")
+    return result
+
+@router.post("/docker_login_check")
+def docker_login_check():
+    result = manage.docker_login_check()
+    return result
+
+@router.post("/docker_login_id_check")
+def docker_login_id_check(user_id: str):
+    result = manage.docker_login_id_check(user_id)
+    return result
+    
 @router.post("/signing_image")
 def signing_image(user_id: str, repo_name: str, image_tag: str, password: str):
     result = manage.signing_image(user_id, repo_name, image_tag, password)
