@@ -19,6 +19,8 @@ def print_list():
             {
                 'idx' : containers_json.index(container),
                 'CONTAINER_ID' : container['Id'],
+                'Stack' : container['Path'],
+                'Name' : container['Name'],
                 'Created Time' : container['Created'],
                 'Status' : container['State']['Status'],
                 'IPAddress' : container['NetworkSettings']['IPAddress'],
@@ -35,6 +37,7 @@ def get_container(container_id):
     except docker.errors.NotFound:
         return None
     return container
+
 # 개별 컨테이너에 대한 info
 def container_info(container_id):
     container = get_container(container_id)
@@ -153,6 +156,14 @@ if __name__ == '__main__':
     elif sys.argv[1] == "list":
         container_list = print_list()
         print(container_list)
+
+    elif sys.argvs[1] == "info":
+        try:
+            result = container_info(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error: No CONTAINER_ID was given\n")
+            help(sys.argv)
 
     elif sys.argvs[1] == "printlog":
         try:
