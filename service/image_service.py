@@ -6,8 +6,8 @@ import os.path
 import dotenv
 from dotenv import load_dotenv
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(os.path.join(BASE_DIR, "../.env"))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+load_dotenv(os.path.join(BASE_DIR, ".env"))
 dotenv_file = dotenv.find_dotenv()
 
 client = docker.from_env()
@@ -146,7 +146,8 @@ def key_gen(password):
         return "COSIGN KEY is exist."
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     subprocess.run(["cosign", "generate-key-pair"], stdout=subprocess.PIPE)
-    return {'key_gen_result': "cosign.pub"}
+    cosign_key_data = open("cosign.pub","r").read()
+    return {'key_gen_result': cosign_key_data}
 
 # 키 삭제
 def key_del(password):
