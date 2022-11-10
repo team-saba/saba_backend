@@ -77,15 +77,15 @@ def docker_login(id, pw):
 
 def docker_logout():
     logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
-    if logout_result.returncode != 0:
-        return None
     return logout_result
 
 def docker_login_check():
-    login_check_result = client.info()
-    # if str(login_check_result).find("Username") == -1:
-    #     return 0
-    return login_check_result
+    try:
+        check_result = subprocess.run(["docker", "login"], stdout=subprocess.PIPE,timeout=3)
+    except:
+        result = "timeout exception"
+        return result
+    return check_result.stdout
 
 def docker_login_id_check(user_id):
     id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
@@ -95,7 +95,6 @@ def docker_login_id_check(user_id):
 
 def signing_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-    
     signing_result = subprocess.run(
         [
             "cosign",
