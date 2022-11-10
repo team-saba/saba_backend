@@ -14,7 +14,7 @@ services:
 
   clair:
     restart: always
-    image: quay.io/projectquay/clair:nightly
+    image: quay.io/projectquay/clair:4.5.0
     volumes:
       - ./clair/config.yaml:/config/config.yaml
     ports:
