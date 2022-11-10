@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-introspection_addr: 0.0.0.0:6061
 http_listen_addr: 0.0.0.0:6060
 log_level: info
 indexer:
@@ -23,7 +22,7 @@ indexer:
 matcher:
   indexer_addr: "localhost:6060"
   connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
-  max_conn_pool: 10
+  max_conn_pool: 3
   run: ""
   migrations: true
   updater_sets:
