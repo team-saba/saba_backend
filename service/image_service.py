@@ -19,14 +19,15 @@ def print_list():
     images_result = []
     for image in images_json:
         if image['Id'] in [container.image.id for container in client.containers.list()]:
-            used = True
+            used = "True"
         else:
-            used = False
+            used = "False"
 
         images_result.append(
             {
-                'Id': image['Id'],
-                'RepoTags': image['RepoTags'][0],
+                'id': images_json.index(image),
+                'Name': image['Id'],
+                'RepoTags': image['RepoTags'],
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
@@ -48,7 +49,7 @@ def scan_image(image_id):
         return None
     scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
     scan_result_parsed = json.loads(scan_result.stdout)['Results']
-    return {'scan_result': scan_result_parsed}
+    return {'scan_result': scan_result_parsed[0]['Vulnerabilities']}
 
 def delete_image(image_id):
     #TODO: delete_image
@@ -76,15 +77,15 @@ def docker_login(id, pw):
 
 def docker_logout():
     logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
-    if logout_result.returncode != 0:
-        return None
     return logout_result
 
 def docker_login_check():
-    login_check_result = client.info()
-    # if str(login_check_result).find("Username") == -1:
-    #     return 0
-    return login_check_result
+    try:
+        check_result = subprocess.run(["docker", "login"], stdout=subprocess.PIPE,timeout=3)
+    except:
+        result = "timeout exception"
+        return result
+    return check_result.stdout
 
 def docker_login_id_check(user_id):
     id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
@@ -94,7 +95,6 @@ def docker_login_id_check(user_id):
 
 def signing_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-    
     signing_result = subprocess.run(
         [
             "cosign",
@@ -128,21 +128,13 @@ def verify_image(user_id, repo_name, image_tag, password):
         return None
     return verify_result
 
-    
-# Required for CLI integration
-# Codes below will be ignored when this file is imported by others,
-# but will be work when solely executed as python script
-# 
-# Whenever a new funciton is added, be sure it is added in below
-#
-# Author: Ch1keen
-
 def key_gen(password):
     if os.path.isfile("./cosign.key") and os.path.isfile("./cosign.pub"):
         return "COSIGN KEY is exist."
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
     subprocess.run(["cosign", "generate-key-pair"], stdout=subprocess.PIPE)
-    return {'key_gen_result': "cosign.pub"}
+    cosign_key_data = open("cosign.pub","r").read()
+    return {'key_gen_result': cosign_key_data}
 
 # 키 삭제
 def key_del(password):
@@ -231,6 +223,13 @@ if __name__ == '__main__':
     elif sys.argv[1] == "keygen":
         try:
             result = key_gen(sys.argv[2])
+            print(result)
+        except IndexError:
+            print("Error")
+
+    elif sys.argv[1] == "keydel":
+        try:
+            result = key_del(sys.argv[2])
             print(result)
         except IndexError:
             print("Error")
