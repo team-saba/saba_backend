@@ -1,6 +1,5 @@
 import docker
 
-
 client = docker.from_env()
 docketAPI = docker.APIClient()
 
@@ -48,28 +47,41 @@ def kill_container(container_id):
     container = get_container(container_id)
     if container is None:
         return None
-    container.kill()
+    try:
+        container.kill()
+    except docker.errors.APIError:
+        return "Error"
+        
     return container
 
 def pause_container(container_id):
     container = get_container(container_id)
     if container is None:
         return None
-    container.pause()
+    try:
+        container.pause()
+    except docker.errors.APIError:
+        return "Error"
     return container
 
 def resume_container(container_id):
     container = get_container(container_id)
     if container is None:
         return None
-    container.unpause()
+    try:
+        container.unpause()
+    except docker.errors.APIError:
+        return "Error"
     return container
 
 def rename_container(container_id, new_name):
     container = get_container(container_id)
     if container is None:
         return None
-    container.rename(new_name)
+    try:
+        container.rename(new_name)
+    except docker.errors.APIError:
+        return "Error"
     return container
 
 def exec_container(container_id, command: str):

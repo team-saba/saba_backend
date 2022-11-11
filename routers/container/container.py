@@ -54,6 +54,8 @@ def kill_container(container: Container):
     container = manage.kill_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
+    if container is "Error":
+        return {"kill" :False}
     return {"kill" :True}
 
 @router.post("/pause")
@@ -62,6 +64,8 @@ def pause_container(container: Container):
     container = manage.pause_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
+    if container is "Error":
+        return {"pause" :False}
     return {"pause" :True}
 
 @router.post("/resume")
@@ -70,6 +74,8 @@ def resume_container(container: Container):
     container = manage.resume_container(container.container_id)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
+    if container is "Error":
+        return {"resume" :False}
     return {"resume" :True}
 
 @router.post("/rename")
@@ -78,6 +84,8 @@ def rename_container(container: Container, new_name: str):
     container = manage.rename_container(container.container_id, new_name)
     if container is None:
         raise HTTPException(status_code=404, detail="Container not found")
+    if container is "Error":
+        return {"rename" :False}
     return {"rename" :True}
 
 @router.post("/exec")
