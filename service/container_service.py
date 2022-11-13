@@ -91,6 +91,47 @@ def delete_container(container_id):
     container.remove()
     return container
 
+def kill_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    try:
+        container.kill()
+    except docker.errors.APIError:
+        return "Error"
+        
+    return container
+
+def pause_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    try:
+        container.pause()
+    except docker.errors.APIError:
+        return "Error"
+    return container
+
+def resume_container(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    try:
+        container.unpause()
+    except docker.errors.APIError:
+        return "Error"
+    return container
+
+def rename_container(container_id, new_name):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    try:
+        container.rename(new_name)
+    except docker.errors.APIError:
+        return "Error"
+    return container
+
 def exec_container(container_id, command: str):
     # in order to check weather container is present
     container = get_container(container_id)
