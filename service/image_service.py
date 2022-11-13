@@ -28,6 +28,7 @@ def print_list():
                 'id': images_json.index(image),
                 'Name': image['Id'],
                 'RepoTags': image['RepoTags'],
+                'RepoDigests': image['RepoDigests'],
                 'Created': image['Created'],
                 'Size': image['Size'],
                 'VirtualSize': image['VirtualSize'],
