@@ -51,6 +51,7 @@ def container_info(container_id):
             'Status': container.attrs['State']['Status'],
             'Created': container.attrs['Created'],
             'Started': container.attrs['State']['StartedAt']
+
         }
     )
     #container_info_result=container.attrs['Id']
