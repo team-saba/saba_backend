@@ -54,6 +54,22 @@ def verify_image(image: Image):
     return result
 
 
+@router.post("/pull_image")
+def verify_image(image: str, tag: str):
+    result = manage.pull_image(image, tag)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image pull fail")
+    return result
+
+
+@router.post("/push_image")
+def push_image(image_id: str, registry: str, repo: str, tag: str):
+    result = manage.push_image(image_id, registry, repo, tag)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Image push fail")
+    return result
+
+
 @router.post("/keygen")
 def key_gen(password: str):
     result = manage.key_gen(password)

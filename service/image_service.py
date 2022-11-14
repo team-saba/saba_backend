@@ -126,6 +126,39 @@ def verify_image(image_id):
     return verify_result.stdout
 
 
+def tag_image(image, repo, tag):
+    try:
+        result = image.tag(repository=repo, tag=tag)
+    except docker.errors.APIError:
+        return None
+    return result
+
+
+def pull_image(image, tag):
+    try:
+        image = client.images.pull(repository=image, tag=tag)
+    except docker.errors.APIError:
+        return None
+    return image.attrs
+
+
+def push_image(image_id, registry, repo, tag):
+    image = get_image(image_id)
+    if image is None:
+        return None
+    
+    repo_name = registry + "/" + repo
+    tag_result = tag_image(image, repo_name, tag)
+    if tag_result is False:
+        return None
+    
+    try:
+        result = client.images.push(repository=repo_name, tag=tag)
+    except docker.errors.APIError:
+        return None
+    return result
+
+
 def key_gen(password):
     if os.path.isfile("./cosign.key") and os.path.isfile("./cosign.pub"):
         return "COSIGN KEY is exist."
@@ -246,7 +279,21 @@ if __name__ == '__main__':
             result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            help_verify()       
+            help_verify()   
+    
+    elif sys.argv[1] == "pull":
+        try:
+            result = pull_image(sys.argv[2], sys.argv[3])
+            print(result)
+        except IndexError:
+            print("Error")     
+            
+    elif sys.argv[1] == "push":
+        try:
+            result = push_image(sys.argv[2], sys.argv[3], sys.argv[4])
+            print(result)
+        except IndexError:
+            print("Error")
 
     elif sys.argv[1] == "keygen":
         try:
