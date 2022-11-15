@@ -7,8 +7,10 @@ import requests
 import json
 
 import diskcache
+from urllib3.exceptions import HTTPError
 from DTO.VulnerabilityQueue import VulnerabilityQueue
 import service.image_service as manage
+
 
 class ReservationWorker:
     request_count = 0
@@ -84,16 +86,6 @@ class ReservationWorker:
             logging.info(f"처리 완료: {reservation.result}")
             self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
 
-            # 결과값 DB 저장
-
-            #self.reservation_success_list.append(reservation)
-
-        except Exception as e:
-            logging.error(e)
-            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
-            return False
-
-        try:
             # Clair Second
             if len(reservation.digest) == 0:
                 # TODO: local image scan
@@ -107,15 +99,27 @@ class ReservationWorker:
                 self.clair_post_manifest(layers=layers, reservation=reservation)
             elif response.status_code == 500:
                 parsed_response = json.loads(response.content)
-                raise Exception(parsed_response)
+                raise HTTPError(parsed_response)
 
             self.clair_get_report(digest)
 
+            # 결과값 DB 저장
+            self.reservation_success_list.append(reservation)
             return True
-        except Exception as e:
+
+
+        except HTTPError as e:
+            logging.error("While handling clair related, error occured")
             logging.error(e)
 
             self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
+
+
+        except Exception as e:
+            logging.error(e)
+            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
+            return False
+
         pass
 
     async def process_reservation_work(self):
