@@ -49,7 +49,9 @@ def container_info(container_id):
             'ID': container.attrs['Id'],
             'Name': container.attrs['Name'],
             'Status': container.attrs['State']['Status'],
-            'Created': container.attrs['Created']
+            'Created': container.attrs['Created'],
+            'Started': container.attrs['State']['StartedAt']
+
         }
     )
     #container_info_result=container.attrs['Id']

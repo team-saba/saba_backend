@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 services:
   saba:
     image: test/saba:latest
@@ -11,3 +11,12 @@ services:
      - "8002:8002"
     env_file:
       - .env
+  mongodb:
+    image: mongo
+    restart: always
+    container: saba-json-mongo
+    ports: 
+    - "27017:27017"
+    volumes:
+    - ./Mongodb/data:/data/db
+    
