@@ -1,6 +1,5 @@
 import datetime
 import logging
-import os
 import asyncio
 import time
 import requests
@@ -29,6 +28,7 @@ class ReservationWorker:
     def __init__(self):
         self.worker_status = diskcache.Cache(directory="./cache/worker_status")
         self.scan_result = diskcache.Cache(directory="./cache/scan_result")
+        self.sign_result = diskcache.Cache(directory="./cache/sign_result")
         pass
 
     def write_worker_status(self):
@@ -77,11 +77,10 @@ class ReservationWorker:
         # 예약 요청 처리
         try:
             # Trivy First
+            print("scan")
             reservation_ticket = manage.scan_image(
                 image_id=reservation.imageId
             )
-            # reservation_ticket = "test"
-            # 예약 완료 처리
             reservation.result = reservation_ticket
             logging.info(f"처리 완료: {reservation.result}")
             self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
@@ -122,6 +121,7 @@ class ReservationWorker:
 
         pass
 
+
     async def process_reservation_work(self):
 
         for reservation_key in self.worker_status.iterkeys():
@@ -130,8 +130,8 @@ class ReservationWorker:
                 await asyncio.sleep(0.01)
                 continue
 
+            print("1")
             reservation = self.worker_status.get(reservation_key)
-
             task = asyncio.create_task(self.do_reservation(reservation))
             self.async_tasks.add(task)
             task.add_done_callback(self.async_tasks.discard)
