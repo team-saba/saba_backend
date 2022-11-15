@@ -49,9 +49,7 @@ def container_info(container_id):
             'ID': container.attrs['Id'],
             'Name': container.attrs['Name'],
             'Status': container.attrs['State']['Status'],
-            'Created': container.attrs['Created'],
-            'Started': container.attrs['State']['StartedAt']
-
+            'Created': container.attrs['Created']
         }
     )
     #container_info_result=container.attrs['Id']
@@ -91,47 +89,6 @@ def delete_container(container_id):
     if container is None:
         return None
     container.remove()
-    return container
-
-def kill_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    try:
-        container.kill()
-    except docker.errors.APIError:
-        return "Error"
-        
-    return container
-
-def pause_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    try:
-        container.pause()
-    except docker.errors.APIError:
-        return "Error"
-    return container
-
-def resume_container(container_id):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    try:
-        container.unpause()
-    except docker.errors.APIError:
-        return "Error"
-    return container
-
-def rename_container(container_id, new_name):
-    container = get_container(container_id)
-    if container is None:
-        return None
-    try:
-        container.rename(new_name)
-    except docker.errors.APIError:
-        return "Error"
     return container
 
 def exec_container(container_id, command: str):
@@ -199,14 +156,6 @@ if __name__ == '__main__':
     elif sys.argv[1] == "list":
         container_list = print_list()
         print(container_list)
-
-    elif sys.argvs[1] == "info":
-        try:
-            result = container_info(sys.argv[2])
-            print(result)
-        except IndexError:
-            print("Error: No CONTAINER_ID was given\n")
-            help(sys.argv)
 
     elif sys.argvs[1] == "printlog":
         try:
