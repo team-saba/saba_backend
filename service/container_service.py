@@ -38,6 +38,23 @@ def get_container(container_id):
         return None
     return container
 
+# 개별 컨테이너에 대한 info
+def container_info(container_id):
+    container = get_container(container_id)
+    if container is None:
+        return None
+    container_info_result=[]
+    container_info_result.append(
+        {
+            'ID': container.attrs['Id'],
+            'Name': container.attrs['Name'],
+            'Status': container.attrs['State']['Status'],
+            'Created': container.attrs['Created']
+        }
+    )
+    #container_info_result=container.attrs['Id']
+    return container_info_result
+
 def print_log(container_id):
     container = get_container(container_id)
     if container is None:
