@@ -14,7 +14,7 @@ services:
   mongodb:
     image: mongo
     restart: always
-    container: saba-json-mongo
+    container_name: saba-json-mongo
     ports: 
     - "27017:27017"
     volumes:
