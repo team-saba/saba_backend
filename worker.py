@@ -83,9 +83,28 @@ class ReservationWorker:
             reservation_ticket = manage.scan_image(
                 image_id=reservation.imageId
             )
-            reservation.result = reservation_ticket
-            logging.info(f"처리 완료: {reservation.result}")
-            self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
+
+            # Trivy Data Saving
+            reservation.result = []
+            trivy_result = reservation_ticket['scan_result']
+            for t in trivy_result:
+                vid = t['VulnerabilityID']
+                d   = t['Description']
+                s   = t['Severity']
+                p   = t['PkgName']
+                pi  = t['InstalledVersion']
+                pix = t.get('FixedVersion', '')
+
+                reservation.result.append({
+                    'cveid': vid,
+                    'description': d,
+                    'severity': s,
+                    'packageName': p,
+                    'packageInstalled': pi,
+                    'packageFixedIn': pix,
+                    'engine': 'trivy',
+                })
+
 
             # Clair Second
             if len(reservation.digest) == 0:
@@ -102,9 +121,31 @@ class ReservationWorker:
                 parsed_response = json.loads(response.content)
                 raise HTTPError(parsed_response)
 
-            self.clair_get_report(digest)
+            clair_result = self.clair_get_report(digest)
+
+            if clair_result != {}:
+                for ck, cv in clair_result['vulnerabilities'].items():
+                    vid = cv['name']
+                    d   = cv['description']
+                    p   = cv['package']['name']
+                    s   = cv['severity'] or cv['normalized_severity']
+                    pi  = cv['package']['version']
+                    pix = cv['fixed_in_version']
+
+                    reservation.result.append({
+                        'cveid': vid,
+                        'description': d,
+                        'severity': s,
+                        'packageName': p,
+                        'packageInstalled': pi,
+                        'packageFixedIn': pix,
+                        'engine': 'clair',
+                    })
 
             # 결과값 DB 저장
+            logging.info(f"처리 완료: {reservation.result}")
+
+            self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
             self.reservation_success_list.append(reservation)
             return True
 
