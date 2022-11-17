@@ -112,14 +112,14 @@ class ReservationWorker:
         except HTTPError as e:
             logging.error("While handling clair related, error occured")
             logging.error(e)
-
-            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
-
+            return False
 
         except Exception as e:
             logging.error(e)
-            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
             return False
+
+        finally:
+            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
 
         pass
 
