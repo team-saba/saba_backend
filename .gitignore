@@ -11,3 +11,4 @@
 /.envrc
 /flake.*
 /.direnv
+/Mongodb/data
