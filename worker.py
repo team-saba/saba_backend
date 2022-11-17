@@ -199,6 +199,9 @@ class ReservationWorker:
 
         request_url = self.docker_manifest_url.format(repo, digest)
         response = requests.get(request_url, headers=header)
+        if response.status_code == 401:
+            raise HTTPError(response.content)
+
         parsed_res = json.loads(response.content)
         if 'manifests' in parsed_res:
             for manifest in parsed_res['manifests']:
@@ -216,6 +219,14 @@ class ReservationWorker:
 
     def clair_get_report(self, digest: str):
         response = requests.get(self.clair_matcher_url + digest)
+        if response.status_code == 401:
+            error_report = 'clair_get_report: 401 Unauthorized\n'
+            error_report += json.loads(response.content)
+            raise HTTPError(error_report)
+        if response.status_code >= 500:
+            error_report = 'clair_get_report: Database or clair server has error; it might be because it is busy.'
+            error_report += json.loads(response.content)
+            raise HTTPError(error_report)
         return json.loads(response.content)['vulnerabilities']
 
     def get_auth_token(self, rsv: VulnerabilityQueue)->str:
