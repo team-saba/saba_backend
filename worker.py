@@ -22,7 +22,7 @@ class ReservationWorker:
 
     auth_url = 'https://auth.docker.io/token'
     docker_registry_url = 'https://registry-1.docker.io/'
-    docker_manifest_url = 'https://registry-1.docker.io/v2/{}/manifest/{}'
+    docker_manifest_url = 'https://registry-1.docker.io/v2/{}/manifests/{}'
     clair_indexer_url = 'http://localhost:6060/indexer/api/v1/index_report'
     clair_matcher_url = 'http://localhost:6060/matcher/api/v1/vulnerability_report/'
 
@@ -155,7 +155,7 @@ class ReservationWorker:
             layer_uri = self.docker_registry_url
             layer_uri += f'/v2/{repo}/blobs/{layer_digest}'
 
-            _layers.append({'hash': layer_digest, 'uri': 'layer_uri', 'headers': header})
+            _layers.append({'hash': layer_digest, 'uri': layer_uri, 'headers': header})
 
         _manifest = {
                         'hash': digest,
@@ -170,9 +170,12 @@ class ReservationWorker:
         header = {'Authorization': token}
         digest = reservation.digest
         repo = reservation.repo_name
+        if repo.find('/') == -1:
+            repo = 'library/' + repo
+
 
         request_url = self.docker_manifest_url.format(repo, digest)
-        response = requests.get(request_url + digest, headers=header)
+        response = requests.get(request_url, headers=header)
         parsed_res = json.loads(response.content)
 
         if 'layers' in parsed_res:
@@ -188,12 +191,14 @@ class ReservationWorker:
 
     def validate_digest(self, reservation: VulnerabilityQueue):
         repo = reservation.repo_name
+        if repo.find('/') == -1:
+            repo = 'library/' + repo
         digest = reservation.digest
         token = 'Bearer ' + self.get_auth_token(reservation)
         header = {'Authorization': token}
 
         request_url = self.docker_manifest_url.format(repo, digest)
-        response = requests.get(request_url + digest, headers=header)
+        response = requests.get(request_url, headers=header)
         parsed_res = json.loads(response.content)
         if 'manifests' in parsed_res:
             for manifest in parsed_res['manifests']:
