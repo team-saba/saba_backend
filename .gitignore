@@ -5,4 +5,10 @@
 *.pyc
 .env
 /cosign.*
+/service/.env
+/clair/db
+/cache
+/.envrc
+/flake.*
+/.direnv
 /Mongodb/data

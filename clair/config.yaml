@@ -1,0 +1,64 @@
+# Copyright 2015 clair authors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+---
+http_listen_addr: 0.0.0.0:6060
+log_level: info
+indexer:
+  connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
+  scanlock_retry: 10
+  layer_scan_concurrency: 2
+  migrations: true
+matcher:
+  indexer_addr: "localhost:6060"
+  connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
+  max_conn_pool: 3
+  run: ""
+  migrations: true
+  updater_sets:
+  - "alpine"
+  - "aws"
+  - "debian"
+  - "oracle"
+  - "photon"
+  - "pyupio"
+  - "rhel"
+  - "suse"
+  - "ubuntu"
+matchers:
+  names:
+  - "alpine"
+  - "aws"
+  - "debian"
+  - "oracle"
+  - "photon"
+  - "python"
+  - "rhel"
+  - "suse"
+  - "ubuntu"
+  - "crda"
+  config:
+    crda:
+      url: https://gw.api.openshift.io/api/v2/
+      source: clair-sample-instance
+      key: 207c527cfc2a6b8dcf4fa43ad7a976da
+notifier:
+  indexer_addr: http://localhost:6060/
+  matcher_addr: http://localhost:6060/
+  connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
+  migrations: true
+  delivery_interval: 1m
+  poll_interval: 5m
+  # if multiple delivery methods are defined the only one will be selected.
+  # preference order:
+  # webhook, amqp, stomp
