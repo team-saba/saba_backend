@@ -90,24 +90,6 @@ def search_dockerhub(keyword):
     return result
 
 
-def docker_logout():
-    logout_result = subprocess.run(["docker", "logout"], stdout=subprocess.PIPE)
-    if logout_result.returncode != 0:
-        return None
-    return logout_result
-
-def docker_login_check():
-    login_check_result = client.info()
-    # if str(login_check_result).find("Username") == -1:
-    #     return 0
-    return login_check_result
-
-def docker_login_id_check(user_id):
-    id_check_result = subprocess.run(["docker", "info"], stdout=subprocess.PIPE)
-    if str(id_check_result).find("Username: "+user_id) == -1:
-        return 0
-    return 1
-
 def signing_image(user_id, repo_name, image_tag, password):
     dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
 
@@ -148,13 +130,6 @@ def verify_image(image_id):
     return verify_result.stdout
 
 
-# Required for CLI integration
-# Codes below will be ignored when this file is imported by others,
-# but will be work when solely executed as python script
-#
-# Whenever a new funciton is added, be sure it is added in below
-#
-# Author: Ch1keen
 def tag_image(image, repo, tag):
     try:
         result = image.tag(repository=repo, tag=tag)
@@ -175,12 +150,12 @@ def push_image(image_id, registry, repo, tag):
     image = get_image(image_id)
     if image is None:
         return None
-    
+
     repo_name = registry + "/" + repo
     tag_result = tag_image(image, repo_name, tag)
     if tag_result is False:
         return None
-    
+
     try:
         result = client.images.push(repository=repo_name, tag=tag)
     except docker.errors.APIError:
@@ -308,15 +283,15 @@ if __name__ == '__main__':
             result = verify_image(sys.argv[2], sys.argv[3], sys.argv[4])
             print(result)
         except IndexError:
-            help_verify()   
-    
+            help_verify()
+
     elif sys.argv[1] == "pull":
         try:
             result = pull_image(sys.argv[2], sys.argv[3])
             print(result)
         except IndexError:
-            print("Error")     
-            
+            print("Error")
+
     elif sys.argv[1] == "push":
         try:
             result = push_image(sys.argv[2], sys.argv[3], sys.argv[4])
