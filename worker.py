@@ -20,6 +20,7 @@ class ReservationWorker:
     reservation_success_list = []
     async_tasks = set()
 
+    auth_url = 'https://auth.docker.io/token'
     docker_registry_url = 'https://registry-1.docker.io/'
     docker_manifest_url = 'https://registry-1.docker.io/v2/{}/manifest/{}'
     clair_indexer_url = 'http://localhost:6060/indexer/api/v1/index_report'
@@ -29,6 +30,7 @@ class ReservationWorker:
         self.worker_status = diskcache.Cache(directory="./cache/worker_status")
         self.scan_result = diskcache.Cache(directory="./cache/scan_result")
         self.sign_result = diskcache.Cache(directory="./cache/sign_result")
+        self.auth_token = diskcache.Cache(directory="./cache/auth_token")
         pass
 
     def write_worker_status(self):
@@ -143,7 +145,8 @@ class ReservationWorker:
 
     # Private Functions
     def clair_post_manifest(self, layers: list, reservation: VulnerabilityQueue):
-        header = { 'Authorization': [ f'Bearer {reservation.token}' ] }
+        token = self.get_auth_token(reservation)
+        header = { 'Authorization': [ f'Bearer {token}' ] }
         digest = reservation.digest
         repo = reservation.repo_name
         _layers = []
@@ -163,7 +166,7 @@ class ReservationWorker:
         return response.status_code
 
     def clair_get_layers(self, reservation: VulnerabilityQueue):
-        token = 'Bearer ' + reservation.token
+        token = 'Bearer ' + self.get_auth_token(reservation)
         header = {'Authorization': token}
         digest = reservation.digest
         repo = reservation.repo_name
@@ -186,7 +189,7 @@ class ReservationWorker:
     def validate_digest(self, reservation: VulnerabilityQueue):
         repo = reservation.repo_name
         digest = reservation.digest
-        token = reservation.token
+        token = 'Bearer ' + self.get_auth_token(reservation)
         header = {'Authorization': token}
 
         request_url = self.docker_manifest_url.format(repo, digest)
@@ -209,6 +212,37 @@ class ReservationWorker:
     def clair_get_report(self, digest: str):
         response = requests.get(self.clair_matcher_url + digest)
         return json.loads(response.content)['vulnerabilities']
+
+    def get_auth_token(self, rsv: VulnerabilityQueue)->str:
+        # request for token of 'ch1keen/pwnable': OK
+        # request for token of 'library/ruby': OK
+        # request for token of 'ruby': OK but won't work
+        repository = rsv.repo_name
+        if repository.find('/') == -1:
+            repository = 'library/' + repository
+
+        token = self.auth_token.get(repository)
+        if token is None:
+            params = {
+                        'service': 'registry.docker.io',
+                        'scope': f'repository:{repository}:pull',
+                     }
+            response = requests.get(self.auth_url, params = params)
+
+            if response.status_code == 200:
+                token_json = json.loads(response.content)
+
+                self.auth_token.set(repository, token_json['token'], expire=token_json['expires_in'])
+                return token_json['token']
+
+            else:
+                logging.error("Cannot retrieve a token: Received %d" % response.status_code)
+                logging.error(json.loads(response.content))
+
+                raise HTTPError('get_auth_token: Cannot retrieve the token.')
+
+        else:
+            return str(token)
 
 async def main():
     tasks = set()
