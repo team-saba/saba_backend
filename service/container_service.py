@@ -4,6 +4,9 @@ import json
 client = docker.from_env()
 docketAPI = docker.APIClient()
 
+#DB 저장소
+container_list_DB = diskcache.Cache(directory="./cache/container_result")
+
 #컨테이너 리스트 보기위한 test code 
 def test_container_list():
     containers = client.containers.list(all)
@@ -13,7 +16,7 @@ def test_container_list():
 def print_list():
     containers = client.containers.list(all)
     containers_json = [container.attrs for container in containers]
-    containers_result=[]
+    containers_result=
     for container in containers_json:
         containers_result.append(
             {
@@ -29,6 +32,8 @@ def print_list():
 
             }
         )
+    # 컨테이너 list DB 저장
+
     return containers_result
 
 def get_container(container_id):

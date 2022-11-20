@@ -17,7 +17,7 @@ app = FastAPI(
     description='BoB11기 프로젝트 Saba의 API 서버입니다.',
     version='0.1.0',
 )
-app.mount("/static", StaticFiles(directory="static"), name="static")
+# app.mount("/static", StaticFiles(directory="static"), name="static")
 
 app.include_router(api_router)
 
