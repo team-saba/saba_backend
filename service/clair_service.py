@@ -35,6 +35,8 @@ def clair_post_manifest(layers: list, reservation: VulnerabilityQueue):
                 }
 
     response = requests.post(clair_indexer_url, json=_manifest)
+    if response.status_code >= 500:
+        raise HTTPError(f"clair_post_manifest: {response.content}")
     return response.status_code
 
 def clair_get_layers(reservation: VulnerabilityQueue):
