@@ -20,6 +20,7 @@ def clair_post_manifest(layers: list, reservation: VulnerabilityQueue):
     header = { 'Authorization': [ f'Bearer {token}' ] }
     digest = reservation.digest
     repo = reservation.repo_name
+
     _layers = []
     for layer in layers:
         layer_digest = layer['digest']
@@ -41,9 +42,6 @@ def clair_get_layers(reservation: VulnerabilityQueue):
     header = {'Authorization': token}
     digest = reservation.digest
     repo = reservation.repo_name
-    if repo.find('/') == -1:
-        repo = 'library/' + repo
-
 
     request_url = docker_manifest_url.format(repo, digest)
     response = requests.get(request_url, headers=header)
@@ -62,8 +60,6 @@ def clair_get_layers(reservation: VulnerabilityQueue):
 
 def validate_digest(reservation: VulnerabilityQueue):
     repo = reservation.repo_name
-    if repo.find('/') == -1:
-        repo = 'library/' + repo
     digest = reservation.digest
     token = 'Bearer ' + get_auth_token(reservation)
     header = {'Authorization': token}
@@ -106,9 +102,6 @@ def get_auth_token(rsv: VulnerabilityQueue)->str:
     # request for token of 'ruby': OK but won't work
     auth_token = diskcache.Cache(directory="./cache/auth_token")
     repository = rsv.repo_name
-
-    if repository.find('/') == -1:
-        repository = 'library/' + repository
 
     token = auth_token.get(repository)
     if token is None:
