@@ -80,42 +80,43 @@ class ReservationWorker:
                 image_id=reservation.imageId
             )
 
-            # Trivy Data Saving
-            reservation.result = []
-            trivy_result = reservation_ticket['scan_result']
-            for t in trivy_result:
-                vid = t['VulnerabilityID']
-                d   = t['Description']
-                s   = t['Severity']
-                p   = t['PkgName']
-                pi  = t['InstalledVersion']
-                pix = t.get('FixedVersion', '')
+            if reservation.scan_on_trivy:
+                # Trivy Data Saving
+                reservation.result = []
+                trivy_result = reservation_ticket['scan_result']
+                for t in trivy_result:
+                    vid = t['VulnerabilityID']
+                    d   = t['Description']
+                    s   = t['Severity']
+                    p   = t['PkgName']
+                    pi  = t['InstalledVersion']
+                    pix = t.get('FixedVersion', '')
 
-                reservation.result.append({
-                    'cveid': vid,
-                    'description': d,
-                    'severity': s,
-                    'packageName': p,
-                    'packageInstalled': pi,
-                    'packageFixedIn': pix,
-                    'engine': 'trivy',
-                })
+                    reservation.result.append({
+                        'cveid': vid,
+                        'description': d,
+                        'severity': s,
+                        'packageName': p,
+                        'packageInstalled': pi,
+                        'packageFixedIn': pix,
+                        'engine': 'trivy',
+                    })
 
 
-            # Clair Second
-            if len(reservation.digest) == 0:
-                # TODO: local image scan
-                raise Exception("Local image scan is currently not supported.")
+            if reservation.scan_on_clair:
+                # Clair Second
+                if len(reservation.digest) == 0:
+                    # TODO: local image scan
+                    raise Exception("Local image scan is currently not supported.")
 
-            breakpoint()
-            digest = clair.validate_digest(reservation)
-            response = requests.get(self.clair_indexer_url + f'/{digest}')
-            if response.status_code == 404:
-                layers = clair.clair_get_layers(reservation)
-                clair.clair_post_manifest(layers=layers, reservation=reservation)
-            elif response.status_code == 500:
-                parsed_response = json.loads(response.content)
-                raise HTTPError(parsed_response)
+                digest = clair.validate_digest(reservation)
+                response = requests.get(self.clair_indexer_url + f'/{digest}')
+                if response.status_code == 404:
+                    layers = clair.clair_get_layers(reservation)
+                    clair.clair_post_manifest(layers=layers, reservation=reservation)
+                elif response.status_code == 500:
+                    parsed_response = json.loads(response.content)
+                    raise HTTPError(parsed_response)
 
             clair_result = clair.clair_get_report(digest)
 
