@@ -19,6 +19,8 @@ jobs:
     - name: first test
       run: 
         import service.image_service as image
+    - name: second test
+      run: 
         result = image.hello_world()
     - name: close python
       run: 
