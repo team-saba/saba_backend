@@ -13,8 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: first test
+    - name: start python
       run: 
         python3
+    - name: first test
+      run: 
         import service.image_service as image
         result = image.hello_world()
+    - name: close python
+      run: 
+        exit()
