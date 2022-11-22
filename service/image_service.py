@@ -15,9 +15,6 @@ dotenv_file = dotenv.find_dotenv()
 client = docker.from_env()
 sign_result = diskcache.Cache(directory="./cache/sign_result")
 
-def hello_world():
-    print('hello world!')
-
 def print_list():
     images = client.images.list()
     images_json = [image.attrs for image in images]
