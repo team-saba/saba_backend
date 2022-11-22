@@ -1,4 +1,4 @@
-version: "3.7"
+version: "3.8"
 services:
   saba:
     image: test/saba:latest
@@ -11,3 +11,31 @@ services:
      - "8002:8002"
     env_file:
       - .env
+
+  clair:
+    restart: always
+    image: quay.io/projectquay/clair:4.5.0
+    volumes:
+      - ./clair/config.yaml:/config/config.yaml
+    ports:
+      - "6060:6060"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15-alpine
+    volumes:
+      - ./clair/db:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: clair
+      POSTGRES_USER: clair
+      POSTGRES_PASSWORD: password
+  mongodb:
+    image: mongo
+    restart: always
+    container_name: saba-json-mongo
+    ports: 
+    - "27017:27017"
+    volumes:
+    - ./Mongodb/data:/data/db
+    

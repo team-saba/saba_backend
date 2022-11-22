@@ -1,12 +1,15 @@
 import datetime
 import logging
-import os
 import asyncio
 import time
+import requests
+import json
 
 import diskcache
+from urllib3.exceptions import HTTPError
 from DTO.VulnerabilityQueue import VulnerabilityQueue
 import service.image_service as manage
+import service.clair_service as clair
 
 class ReservationWorker:
     request_count = 0
@@ -17,9 +20,13 @@ class ReservationWorker:
     reservation_success_list = []
     async_tasks = set()
 
+    clair_indexer_url = 'http://localhost:6060/indexer/api/v1/index_report'
+
     def __init__(self):
         self.worker_status = diskcache.Cache(directory="./cache/worker_status")
         self.scan_result = diskcache.Cache(directory="./cache/scan_result")
+        self.sign_result = diskcache.Cache(directory="./cache/sign_result")
+        self.auth_token = diskcache.Cache(directory="./cache/auth_token")
         pass
 
     def write_worker_status(self):
@@ -67,26 +74,93 @@ class ReservationWorker:
 
         # 예약 요청 처리
         try:
+            # Trivy First
+            print("scan")
             reservation_ticket = manage.scan_image(
                 image_id=reservation.imageId
             )
-            # reservation_ticket = "test"
-            # 예약 완료 처리
-            reservation.result = reservation_ticket
-            logging.info(f"처리 완료: {reservation.result}")
-            self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
+
+            if reservation.scan_on_trivy:
+                # Trivy Data Saving
+                reservation.result = []
+                trivy_result = reservation_ticket['scan_result']
+                for t in trivy_result:
+                    vid = t['VulnerabilityID']
+                    d   = t['Description']
+                    s   = t['Severity']
+                    p   = t['PkgName']
+                    pi  = t['InstalledVersion']
+                    pix = t.get('FixedVersion', '')
+
+                    reservation.result.append({
+                        'cveid': vid,
+                        'description': d,
+                        'severity': s,
+                        'packageName': p,
+                        'packageInstalled': pi,
+                        'packageFixedIn': pix,
+                        'engine': 'trivy',
+                    })
+
+
+            if reservation.scan_on_clair:
+                # Clair Second
+                if len(reservation.digest) == 0:
+                    # TODO: local image scan
+                    raise Exception("Local image scan is currently not supported.")
+
+                digest = clair.validate_digest(reservation)
+                response = requests.get(self.clair_indexer_url + f'/{digest}')
+                if response.status_code == 404:
+                    layers = clair.clair_get_layers(reservation)
+                    clair.clair_post_manifest(layers=layers, reservation=reservation)
+                elif response.status_code == 500:
+                    parsed_response = json.loads(response.content)
+                    raise HTTPError(parsed_response)
+
+            clair_result = clair.clair_get_report(digest)
+
+            if clair_result != {}:
+                for ck, cv in clair_result['vulnerabilities'].items():
+                    vid = cv['name']
+                    d   = cv['description']
+                    p   = cv['package']['name']
+                    s   = cv['severity'] or cv['normalized_severity']
+                    pi  = cv['package']['version']
+                    pix = cv['fixed_in_version']
+
+                    reservation.result.append({
+                        'cveid': vid,
+                        'description': d,
+                        'severity': s,
+                        'packageName': p,
+                        'packageInstalled': pi,
+                        'packageFixedIn': pix,
+                        'engine': 'clair',
+                    })
 
             # 결과값 DB 저장
+            logging.info(f"처리 완료: {reservation.result}")
 
+            self.scan_result.set(f"Vulnerability_{reservation.imageId}", reservation.result, retry=True)
             self.reservation_success_list.append(reservation)
-            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
-
             return True
+
+
+        except HTTPError as e:
+            logging.error("While handling clair related, error occured")
+            logging.error(e)
+            return False
+
         except Exception as e:
             logging.error(e)
-            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
             return False
+
+        finally:
+            self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
+
         pass
+
 
     async def process_reservation_work(self):
 
@@ -96,8 +170,8 @@ class ReservationWorker:
                 await asyncio.sleep(0.01)
                 continue
 
+            print("1")
             reservation = self.worker_status.get(reservation_key)
-
             task = asyncio.create_task(self.do_reservation(reservation))
             self.async_tasks.add(task)
             task.add_done_callback(self.async_tasks.discard)
@@ -106,6 +180,7 @@ class ReservationWorker:
             delay = self.get_next_delay()
             self.write_worker_status()
             await asyncio.sleep(delay)
+
 
 async def main():
     tasks = set()
@@ -120,4 +195,5 @@ async def main():
             logging.info("never mind. continue")
         await asyncio.sleep(0.3)
 
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())
