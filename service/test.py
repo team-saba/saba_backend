@@ -1,9 +1,9 @@
 import image_service as service
 import image_id as imageId
 
-imageId =imageId.image_id
 
 def test():
+    imageId =imageId.image_id
     result = service.scan_image(imageId)
     print(result)
 
