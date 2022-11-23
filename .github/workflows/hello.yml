@@ -12,23 +12,21 @@ on:
         default: 'Seungkyu'
         type: string
 
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.run-test.outputs }}
+
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-
-      - name: Run hello.sh
+      - id: run-test
         run: |
           set -xe
           chmod +x .github/workflows/hello.sh
           .github/workflows/hello.sh ${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}
-
-outputs:
-  some_output:
-    description: some output
-  
-jobs:
-  script:
-    -echo ::set-output name=some_output::"$SOME_OUTPUT"
+        run:
+          script: 
+            echo test ${{ steps.run-test.outputs }}
