@@ -19,7 +19,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Run hello.sh
+      - name: Run service/hello.sh
         run: |
           set -xe
           chmod +x .github/workflows/hello.sh
