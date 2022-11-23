@@ -1,7 +1,6 @@
 name: Hello
 
 on: 
-  push: 
   workflow_dispatch:
     inputs:
       greeting:
@@ -17,9 +16,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Run service/hello.sh
+      - name: Run hello.sh
         run: |
           set -xe
           chmod +x .github/workflows/hello.sh
