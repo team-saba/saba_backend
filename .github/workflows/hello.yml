@@ -3,19 +3,10 @@ name: Hello
 on: 
   workflow_dispatch:
     inputs:
-      greeting:
-        required: false
-        default: 'Hello'
-        type: string
-      name:
-        required: false
-        default: 'Seungkyu'
+      imageId:
+        required: true
         type: string
 
-# outputs:
-#   random-number:
-#     description: "Random number"
-#     value: ${{ steps.run-test.outputs }}
 
 jobs:
   test:
@@ -26,5 +17,5 @@ jobs:
         run: |
           set -xe
           chmod +x .github/workflows/hello.sh
-          .github/workflows/hello.sh ${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}
+          .github/workflows/hello.sh ${{ github.event.inputs.imageId }}
           echo test ${{ steps.run-test.outputs }}
