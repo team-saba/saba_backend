@@ -27,6 +27,4 @@ jobs:
           set -xe
           chmod +x .github/workflows/hello.sh
           .github/workflows/hello.sh ${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}
-        run:
-          script: 
-            echo test ${{ steps.run-test.outputs }}
+          echo test ${{ steps.run-test.outputs }}
