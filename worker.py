@@ -4,6 +4,7 @@ import asyncio
 import time
 import requests
 import json
+import re
 
 import diskcache
 from urllib3.exceptions import HTTPError
@@ -80,9 +81,11 @@ class ReservationWorker:
                 image_id=reservation.imageId
             )
 
+            reservation.result = []
+            cveids = []
+
             if reservation.scan_on_trivy:
                 # Trivy Data Saving
-                reservation.result = []
                 trivy_result = reservation_ticket['scan_result']
                 for t in trivy_result:
                     vid = t['VulnerabilityID']
@@ -92,6 +95,7 @@ class ReservationWorker:
                     pi  = t['InstalledVersion']
                     pix = t.get('FixedVersion', '')
 
+                    cveids.append(vid)
                     reservation.result.append({
                         'cveid': vid,
                         'description': d,
@@ -118,26 +122,34 @@ class ReservationWorker:
                     parsed_response = json.loads(response.content)
                     raise HTTPError(parsed_response)
 
-            clair_result = clair.clair_get_report(digest)
+                clair_result = clair.clair_get_report(digest)
 
-            if clair_result != {}:
-                for ck, cv in clair_result['vulnerabilities'].items():
-                    vid = cv['name']
-                    d   = cv['description']
-                    p   = cv['package']['name']
-                    s   = cv['severity'] or cv['normalized_severity']
-                    pi  = cv['package']['version']
-                    pix = cv['fixed_in_version']
+                if clair_result != {}:
+                    cve_format = re.compile('[A-Z]{3}-\\d{4}-\\d{4,7}', re.IGNORECASE)
 
-                    reservation.result.append({
-                        'cveid': vid,
-                        'description': d,
-                        'severity': s,
-                        'packageName': p,
-                        'packageInstalled': pi,
-                        'packageFixedIn': pix,
-                        'engine': 'clair',
-                    })
+                    for ck, cv in clair_result.items():
+                        parsed_vid = cve_format.search(cv['name'])
+
+                        if parsed_vid is not None \
+                            and any([parsed_vid.group() in cveid for cveid in cveids]):
+                            continue
+
+                        vid = cv['name']
+                        d   = cv['description']
+                        p   = cv['package']['name']
+                        s   = cv['severity'] or cv['normalized_severity']
+                        pi  = cv['package']['version']
+                        pix = cv['fixed_in_version']
+
+                        reservation.result.append({
+                            'cveid': vid,
+                            'description': d,
+                            'severity': s,
+                            'packageName': p,
+                            'packageInstalled': pi,
+                            'packageFixedIn': pix,
+                            'engine': 'clair',
+                        })
 
             # 결과값 DB 저장
             logging.info(f"처리 완료: {reservation.result}")
