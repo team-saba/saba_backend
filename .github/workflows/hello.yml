@@ -1,20 +1,17 @@
 name: Hello
 
-on:
-  push:
+on: 
+  push: 
   workflow_dispatch:
-
-# on: 
-#   workflow_dispatch:
-#     inputs:
-#       greeting:
-#         required: false
-#         default: 'Hello'
-#         type: string
-#       name:
-#         required: false
-#         default: 'Seungkyu'
-#         type: string
+    inputs:
+      greeting:
+        required: false
+        default: 'Hello'
+        type: string
+      name:
+        required: false
+        default: 'Seungkyu'
+        type: string
 
 jobs:
   build:
