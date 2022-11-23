@@ -28,3 +28,7 @@ jobs:
 outputs:
   some_output:
     description: some output
+  
+jobs:
+  script:
+    -echo ::set-output name=some_output::"$SOME_OUTPUT"
