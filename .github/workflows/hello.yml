@@ -12,10 +12,10 @@ on:
         default: 'Seungkyu'
         type: string
 
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.run-test.outputs }}
+# outputs:
+#   random-number:
+#     description: "Random number"
+#     value: ${{ steps.run-test.outputs }}
 
 jobs:
   test:
