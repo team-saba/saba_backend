@@ -1,22 +1,27 @@
 name: Hello
 
-on: 
-  workflow_dispatch:
-    inputs:
-      greeting:
-        required: false
-        default: 'Hello'
-        type: string
-      name:
-        required: false
-        default: 'Seungkyu'
-        type: string
+on:
+  push:
+    branches: [ "feat/action" ]
+  pull_request:
+    branches: [ "feat/action" ]
+
+# on: 
+#   workflow_dispatch:
+#     inputs:
+#       greeting:
+#         required: false
+#         default: 'Hello'
+#         type: string
+#       name:
+#         required: false
+#         default: 'Seungkyu'
+#         type: string
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
       - name: Run service/hello.sh
