@@ -65,6 +65,8 @@ def push_image(image_id):
 
 def scan_image(image_id):
     image = get_image(image_id)
+    print(image_id)
+    print(image)
     if image is None:
         return None
     scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
