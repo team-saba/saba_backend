@@ -2,6 +2,7 @@ name: Hello
 
 on: 
   push:
+    branches: [ "feat/action" ]
   workflow_dispatch:
     inputs:
       imageId:
