@@ -2,9 +2,7 @@ name: work CI test
 
 on:
   push:
-    branches: [ "feat/action" ]
-  pull_request:
-    branches: [ "feat/action" ]
+  workflow_dispatch:
 
 jobs:
 
