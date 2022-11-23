@@ -1,0 +1,26 @@
+name: Hello
+
+on: 
+  workflow_dispatch:
+    inputs:
+      greeting:
+        required: false
+        default: 'Hello'
+        type: string
+      name:
+        required: false
+        default: 'Seungkyu'
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      - name: Run hello.sh
+        run: |
+          set -xe
+          chmod +x .github/workflows/hello.sh
+          .github/workflows/hello.sh ${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}
