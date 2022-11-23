@@ -24,3 +24,7 @@ jobs:
           set -xe
           chmod +x .github/workflows/hello.sh
           .github/workflows/hello.sh ${{ github.event.inputs.greeting }} ${{ github.event.inputs.name }}
+
+outputs:
+  some_output:
+    description: some output
