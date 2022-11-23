@@ -12,3 +12,4 @@
 /flake.*
 /.direnv
 /Mongodb/data
+/service/image_id.py
