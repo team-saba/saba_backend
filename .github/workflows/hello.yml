@@ -15,14 +15,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - id: install-dependencies 
+      - name: Display the path
         run: |
-          cd $GITHUB_WORKSPACE
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-      - id: running-code
-        run: |
-          cd $GITHUB_WORKSPACE
-          python3 service/test.py ${{ github.event.inputs.imageId }}
+          import os
+          print(os.environ['PATH'])
+        shell: python {0}
+      # - id: install-dependencies 
+      #   run: |
+      #     cd $GITHUB_WORKSPACE
+      #     python -m pip install --upgrade pip
+      #     pip install -r requirements.txt
+      # - id: running-code
+      #   run: |
+      #     cd $GITHUB_WORKSPACE
+      #     python3 service/test.py ${{ github.event.inputs.imageId }}
 
 
