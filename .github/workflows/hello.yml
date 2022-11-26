@@ -20,8 +20,11 @@ jobs:
           import os
           print(os.environ['PATH'])
           print('이렇게 하면 바로 접근되는 지 확인')
-          import service.image_service as service
-          print(service.print_list()) 
+          print()
+          
+          print(__file__)
+          print(os.path.realpath(__file__))
+          print(os.path.abspath(__file__))
           
         shell: python {0}
       # - id: install-dependencies 
