@@ -21,6 +21,6 @@ jobs:
       #     pip install -r requirements.txt
       - id: running-code
         run: |
-          python3 service/test.py     
+          python3 service/test.py "${{ github.event.inputs.imageId }}
 
 
