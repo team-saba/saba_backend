@@ -1,4 +1,4 @@
-import image_service as service
+# import image_service as service
 import image_id as imageId
 
 
