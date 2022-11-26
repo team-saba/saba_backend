@@ -20,7 +20,7 @@ jobs:
           import os
           print(os.environ['PATH'])
           print('이렇게 하면 바로 접근되는 지 확인')
-          import image_service as service
+          import service/image_service as service
           print(service.print_list()) 
           
         shell: python {0}
