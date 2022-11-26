@@ -17,4 +17,4 @@ jobs:
       - uses: actions/checkout@v2
       - id: run-test
         run: |
-          sudo service/test.py     
+          python3 service/test.py     
