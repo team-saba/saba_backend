@@ -90,9 +90,6 @@ def search_dockerhub(keyword):
     return result
 
 
-def signing_image(user_id, repo_name, image_tag, password):
-    dotenv.set_key(dotenv_file, "COSIGN_PASSWORD", str(password))
-
 def signing_image(image_id):
     image = get_image(image_id)
     image.tag(f"regi.seungwook.me/{image_id}")
@@ -144,23 +141,6 @@ def pull_image(image, tag):
     except docker.errors.APIError:
         return None
     return image.attrs
-
-
-def push_image(image_id, registry, repo, tag):
-    image = get_image(image_id)
-    if image is None:
-        return None
-
-    repo_name = registry + "/" + repo
-    tag_result = tag_image(image, repo_name, tag)
-    if tag_result is False:
-        return None
-
-    try:
-        result = client.images.push(repository=repo_name, tag=tag)
-    except docker.errors.APIError:
-        return None
-    return result
 
 
 def key_gen(password):
