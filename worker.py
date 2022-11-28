@@ -109,7 +109,7 @@ class ReservationWorker:
 
             if reservation.scan_on_clair:
                 # Clair Second
-                if len(reservation.digest) == 0:
+                if reservation.digest is None:
                     # TODO: local image scan
                     raise Exception("Local image scan is currently not supported.")
 
