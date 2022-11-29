@@ -9,3 +9,4 @@ python-dotenv
 diskcache
 fastapi-sqlalchemy
 pymongo
+aiohttp

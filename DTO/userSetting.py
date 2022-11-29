@@ -4,11 +4,11 @@ from dataclasses import dataclass
 
 @dataclass
 class UserSetting:
-    GIJUN_PER_MINUTE: int = 10
+    GIJUN_PER_MINUTE: int = 1
 
     HOOK_URL: str = "https://hooks.slack.com/services/XXXXXXXXX/XXXXXXXXX/XXXXXXXXXXXXXXXXXXXXXXXX"
 
-    VUL_LEVEL: int = 3
+    VUL_LEVEL: int = 1
 
     AUTO_SCAN: bool = False
     AUTO_STOP: bool = False
