@@ -22,6 +22,6 @@ def get_settings():
     return SettingManager().get_setting()
 
 
-@arouter.put("/settings")
+@router.put("/settings")
 def put_settings(user_setting: UserSetting):
     return SettingManager().update_setting(user_setting=user_setting)
