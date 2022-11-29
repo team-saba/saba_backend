@@ -5,6 +5,8 @@ import time
 import asyncio
 import aiohttp
 
+from diskcache import Cache
+
 from DTO.userSetting import UserSetting
 from service.settingManager import SettingManager
 
@@ -25,6 +27,7 @@ class ScaningWorker:
     def __init__(self):
         self.get_setting()
         self.gi_jun_time = datetime.datetime.now()
+        self.cache = Cache("./cache/settings")
         pass
 
     def get_setting(self):
@@ -49,37 +52,42 @@ class ScaningWorker:
 
         # Scan 업무 시작
         try:
-            container_list = dockercontainer.print_list()
+            container_list = dockercontainer.run_container_list()
             image_list = [container['Image'] for container in container_list]
 
             for image in image_list:
+                if self.cache.get(f"alert_{image}"):
+                    continue
+
                 scan_result = manage.scan_image(
                     image_id=image
                 )
                 trivy_result = scan_result['scan_result']
                 vul_result = []
-                VUL_LEVEL = self.severity[:self.setting['VUL_LEVEL']]
-                container_name = [container.name for container in container_list if container.image.id == image][0]
-                container_id = [container.id for container in container_list if container.image.id == image][0]
+                VUL_LEVEL = self.severity[0:self.setting['VUL_LEVEL']]
+
+                container_id = [container['Id'] for container in container_list if container['Image'] == image][0]
+                container_name = [container['Name'] for container in container_list if container['Image'] == image][0]
+
                 for vul in trivy_result:
+
                     if vul['Severity'] in VUL_LEVEL:
                         if self.setting['AUTO_STOP']:
                             dockercontainer.stop_container(container_id)
-                        vul_result.append({
-                            "VulnerabilityID" : vul['VulnerabilityID'],
-                            "PkgName" : vul['PkgName'],
-                            "Severity" : vul['Severity'],
-                        })
 
-                self.scan_success_list.append({
-                    "container_name" : container_name,
-                    "image" : image,
-                    "vul_result" : vul_result
-                })
+                        if not image in vul_result:
+                            vul_result.append(image)
+
+                if len(vul_result) > 0:
+                    self.cache.set(f"alert_{image}", retry=True)
+                    self.scan_success_list.append({
+                        "container_name" : container_name,
+                        "image" : image,
+                    })
             return True
 
         except Exception as e:
-            logging.error(e)
+            logging.error(e, exc_info=True)
             pass
 
     async def do_scan_loop(self):
@@ -95,14 +103,17 @@ async def slack_al_lim_send(vul):
     message = (
         f"컨테이너명 : {vul['container_name']}\n"
         f"이미지명 : {vul['image']}\n"
-        f"취약점 : {vul['vul_result']}\n"
-        f"발견 되었습니다"
+        f"에서 취약한 취약점이 발견 되었습니다"
     )
 
     payload = {"text": message}
 
     async with aiohttp.ClientSession() as session:
-        async with session.post(UserSetting.HOOK_URL, json=payload) as response:
+        # get_setting
+        setting = SettingManager().get_setting()
+        webhook_url = setting['HOOK_URL']
+        print(webhook_url)
+        async with session.post(webhook_url, json=payload) as response:
             print("telegram_al_lim_send done")
             return True
     pass
