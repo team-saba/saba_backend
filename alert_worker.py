@@ -33,7 +33,7 @@ class ScaningWorker:
 
     def get_next_delay(self):
         now = datetime.datetime.now()
-        GIJUN_PER_MINUTE = self.setting.GIJUN_PER_MINUTE
+        GIJUN_PER_MINUTE = self.setting['GIJUN_PER_MINUTE']
         reset_time = self.gi_jun_time + datetime.timedelta(minutes=GIJUN_PER_MINUTE)
         if now > reset_time:
             self.quota_gi_jun_time = now
@@ -44,13 +44,13 @@ class ScaningWorker:
         pass
 
     async def do_scan(self):
-        if not self.setting.AUTO_SCAN:
+        if not self.setting['AUTO_SCAN']:
             return
 
         # Scan 업무 시작
         try:
             container_list = dockercontainer.print_list()
-            image_list = [container.image for container in container_list]
+            image_list = [container['Image'] for container in container_list]
 
             for image in image_list:
                 scan_result = manage.scan_image(
@@ -58,12 +58,12 @@ class ScaningWorker:
                 )
                 trivy_result = scan_result['scan_result']
                 vul_result = []
-                VUL_LEVEL = self.severity[:self.setting.VUL_LEVEL]
+                VUL_LEVEL = self.severity[:self.setting['VUL_LEVEL']]
                 container_name = [container.name for container in container_list if container.image.id == image][0]
                 container_id = [container.id for container in container_list if container.image.id == image][0]
                 for vul in trivy_result:
                     if vul['Severity'] in VUL_LEVEL:
-                        if self.setting.AUTO_STOP:
+                        if self.setting['AUTO_STOP']:
                             dockercontainer.stop_container(container_id)
                         vul_result.append({
                             "VulnerabilityID" : vul['VulnerabilityID'],

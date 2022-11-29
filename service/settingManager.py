@@ -20,8 +20,7 @@ class SettingManager:
     def get_setting(self):
         user_setting_dict = self.cache.get(self.setting_key, retry=True, default=UserSetting().to_dict())
         user_setting = UserSetting(**user_setting_dict)
-        user_setting.AUTO_SCAN = False
-        return
+        return user_setting_dict
 
     def slack_oauth(self, code):
         client_id = os.getenv("CLIENT_ID")
