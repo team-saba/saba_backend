@@ -57,6 +57,7 @@ class ScaningWorker:
 
             for image in image_list:
                 if self.cache.get(f"alert_{image}"):
+                    print("ok")
                     continue
 
                 scan_result = manage.scan_image(
@@ -79,7 +80,7 @@ class ScaningWorker:
                             vul_result.append(image)
 
                 if len(vul_result) > 0:
-                    self.cache.set(f"alert_{image}", retry=True)
+                    self.cache.set(key=f"alert_{image}", value=True, expire=60*60*24, retry=True)
                     self.scan_success_list.append({
                         "container_name" : container_name,
                         "image" : image,
