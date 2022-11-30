@@ -27,11 +27,7 @@ def server_checker():
 
 @app.get("/")
 def root():
-    return RedirectResponse(url='/static/index.html')
-
-@app.get("/console")
-def root():
-    return RedirectResponse(url='/static/console.html')
+    return {"Hello": "World"}
 
 if __name__ == "__main__":
     multiprocessing.freeze_support()
