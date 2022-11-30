@@ -8,8 +8,8 @@ docketAPI = docker.APIClient()
 container_list_DB = diskcache.Cache(directory="./cache/container_result")
 
 #컨테이너 리스트 보기위한 test code 
-def test_container_list():
-    containers = client.containers.list(all)
+def run_container_list():
+    containers = client.containers.list()
     containers = [container.attrs for container in containers]
     return containers
 
