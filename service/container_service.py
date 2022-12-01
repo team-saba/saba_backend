@@ -16,7 +16,7 @@ def run_container_list():
 def print_list():
     containers = client.containers.list(all)
     containers_json = [container.attrs for container in containers]
-    containers_result=
+    containers_result= []
     for container in containers_json:
         containers_result.append(
             {
