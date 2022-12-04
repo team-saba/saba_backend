@@ -28,6 +28,7 @@ class ScaningWorker:
         self.get_setting()
         self.gi_jun_time = datetime.datetime.now()
         self.cache = Cache("./cache/settings")
+        self.scan_result = Cache("./cache/scan_result")
         pass
 
     def get_setting(self):
@@ -54,23 +55,41 @@ class ScaningWorker:
         try:
             container_list = dockercontainer.run_container_list()
             image_list = [container['Image'] for container in container_list]
-
             for image in image_list:
+                print(image)
                 if self.cache.get(f"alert_{image}"):
-                    print("ok")
                     continue
 
-                scan_result = manage.scan_image(
-                    image_id=image
+                result = manage.scan_image(
+                    image_id=f"{image}"
                 )
-                trivy_result = scan_result['scan_result']
+
+                trivy_result = result['scan_result']
                 vul_result = []
+                cache_temp = []
                 VUL_LEVEL = self.severity[0:self.setting['VUL_LEVEL']]
 
                 container_id = [container['Id'] for container in container_list if container['Image'] == image][0]
                 container_name = [container['Name'] for container in container_list if container['Image'] == image][0]
 
                 for vul in trivy_result:
+
+                    vid = vul['VulnerabilityID']
+                    d = vul['Description']
+                    s = vul['Severity']
+                    p = vul['PkgName']
+                    pi = vul['InstalledVersion']
+                    pix = vul.get('FixedVersion', '')
+
+                    cache_temp.append({
+                        'cveid': vid,
+                        'description': d,
+                        'severity': s,
+                        'packageName': p,
+                        'packageInstalled': pi,
+                        'packageFixedIn': pix,
+                        'engine': 'trivy',
+                    })
 
                     if vul['Severity'] in VUL_LEVEL:
                         if self.setting['AUTO_STOP']:
@@ -81,6 +100,7 @@ class ScaningWorker:
 
                 if len(vul_result) > 0:
                     self.cache.set(key=f"alert_{image}", value=True, expire=60*60*24, retry=True)
+                    self.scan_result.set(f"Vulnerability_{image}", cache_temp, retry=True)
                     self.scan_success_list.append({
                         "container_name" : container_name,
                         "image" : image,
@@ -120,7 +140,7 @@ async def slack_al_lim_send(vul):
                 "type": "section",
                 "text": {
                     "type": "mrkdwn",
-                    "text": f"- 컨테이너명 : {vul['container_name'][1:]} \n - 이미지명 : {vul['image'][:8]} \n - 취약점 : {vul['vul_id']} \n - 취약점 등급 : {vul['vul_level']}"
+                    "text": f"- 컨테이너명 : {vul['container_name'][1:]} \n - 이미지명 : {vul['image'][3:12]} \n - 취약점 : {vul['vul_id']} \n - 취약점 등급 : {vul['vul_level']}"
                 }
             },
             {
@@ -140,7 +160,7 @@ async def slack_al_lim_send(vul):
                         "emoji": True
                     },
                     "value": "click_me_123",
-                    "url": "https://works.miscthings.net/",
+                    "url": f"https://saba.daegu.ac/cve/?imageId={vul['image']}",
                     "action_id": "button-action"
                 }
             }
@@ -161,8 +181,6 @@ async def telegram_al_lim_worker(scan_manager: ScaningWorker):
     tasks = set()
 
     while True:
-        print("telegram al lim worker loop")
-
         if len(scan_manager.scan_success_list) > 0:
             reservation = scan_manager.scan_success_list.pop()
             task = asyncio.create_task(slack_al_lim_send(reservation))
