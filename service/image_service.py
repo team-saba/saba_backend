@@ -70,7 +70,14 @@ def scan_image(image_id):
     scan_result = subprocess.run(["trivy", "image", "--security-checks", "vuln", image_id, "--quiet", "--format=json"], stdout=subprocess.PIPE)
     scan_result_parsed = json.loads(scan_result.stdout)['Results']
 
-    return {'scan_result': [result.get('Vulnerabilities') for result in scan_result_parsed]}
+    scan_result_appended = []
+    for r in scan_result_parsed:
+        v = r.get('Vulnerabilities')
+        if v is not None:
+            for _v in v:
+                scan_result_appended.append(_v)
+
+    return {'scan_result': scan_result_appended}
 
 
 def delete_image(image_id):
