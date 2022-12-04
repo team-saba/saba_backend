@@ -84,6 +84,8 @@ class ScaningWorker:
                     self.scan_success_list.append({
                         "container_name" : container_name,
                         "image" : image,
+                        "vul_level" : VUL_LEVEL,
+                        "vul_id" : vul['VulnerabilityID']
                     })
             return True
 
@@ -101,13 +103,49 @@ class ScaningWorker:
         await asyncio.sleep(self.get_next_delay())
 
 async def slack_al_lim_send(vul):
-    message = (
-        f"컨테이너명 : {vul['container_name']}\n"
-        f"이미지명 : {vul['image']}\n"
-        f"에서 취약한 취약점이 발견 되었습니다"
-    )
-
-    payload = {"text": message}
+    payload = {
+        "blocks": [
+            {
+                "type": "header",
+                "text": {
+                    "type": "plain_text",
+                    "text": "[Runtime] 취약점 발견 알림",
+                    "emoji": True
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"- 컨테이너명 : {vul['container_name'][1:]} \n - 이미지명 : {vul['image'][:8]} \n - 취약점 : {vul['vul_id']} \n - 취약점 등급 : {vul['vul_level']}"
+                }
+            },
+            {
+                "type": "divider"
+            },
+            {
+                "type": "section",
+                "text": {
+                    "type": "mrkdwn",
+                    "text": "취약점 보고서 링크 바로가기"
+                },
+                "accessory": {
+                    "type": "button",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "바로가기",
+                        "emoji": True
+                    },
+                    "value": "click_me_123",
+                    "url": "https://works.miscthings.net/",
+                    "action_id": "button-action"
+                }
+            }
+            ]
+    }
 
     async with aiohttp.ClientSession() as session:
         # get_setting
