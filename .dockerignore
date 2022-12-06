@@ -1,3 +1,16 @@
+# Docker Related Things
 .dockerignore
 Dockerfile
-*.pyc
+
+# Git
+.gitignore
+.git
+
+# Python Cache
+**/*.pyc
+__pycache__/
+
+# Database Caches
+Mongodb/
+clair/db/
+
