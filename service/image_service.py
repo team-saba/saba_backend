@@ -12,6 +12,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 load_dotenv(os.path.join(BASE_DIR, ".env"))
 dotenv_file = dotenv.find_dotenv()
 
+Registry_URL = os.getenv("Registry_URL")
+
 client = docker.from_env()
 sign_result = diskcache.Cache(directory="./cache/sign_result")
 
@@ -100,15 +102,15 @@ def search_dockerhub(keyword):
 
 def signing_image(image_id):
     image = get_image(image_id)
-    image.tag(f"regi.seungwook.me/{image_id}")
-    push_image(f"regi.seungwook.me/{image_id}")
+    image.tag(f"{Registry_URL}/{image_id}")
+    push_image(f"{Registry_URL}/{image_id}")
     signing_result = subprocess.run(
         [
             "cosign",
             "sign",
             "--key",
             "cosign.key",
-            f"regi.seungwook.me/{image_id}",
+            f"{Registry_URL}/{image_id}",
         ],
         stdout=subprocess.PIPE,
     )
@@ -125,7 +127,7 @@ def verify_image(image_id):
             "verify",
             "--key",
             "cosign.pub",
-            f"regi.seungwook.me/{image_id}",
+            f"{Registry_URL}/{image_id}",
         ],
         stdout=subprocess.PIPE,
     )
