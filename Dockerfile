@@ -6,7 +6,7 @@ RUN apk add cosign
 # Trivy is only in testing repository
 RUN apk add trivy --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing
 
-WORKDIR /app
+WORKDIR /app/back
 
 COPY . .
 RUN pip install -r requirements.txt
