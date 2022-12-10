@@ -60,7 +60,7 @@ def print_log(container_id):
     if container is None:
         return None
     container_log_result=[]
-    container_log_result=container.attrs['State']['Health']['Log']
+    container_log_result=container.attrs['State']['Log']
     return container_log_result
 
 def start_container(container_id):
