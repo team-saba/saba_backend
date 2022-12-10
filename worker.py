@@ -77,14 +77,15 @@ class ReservationWorker:
         try:
             # Trivy First
             print("scan")
-            reservation_ticket = manage.scan_image(
-                image_id=reservation.imageId
-            )
 
             reservation.result = []
             cveids = []
 
             if reservation.scan_on_trivy:
+                reservation_ticket = manage.scan_image(
+                    image_id=reservation.imageId
+                )
+
                 # Trivy Data Saving
                 trivy_result = reservation_ticket['scan_result']
                 for t in trivy_result:
