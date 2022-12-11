@@ -8,14 +8,13 @@ import json
 import diskcache
 from urllib3.exceptions import HTTPError
 from DTO.VulnerabilityQueue import VulnerabilityQueue
+import service.image_service as manage
 
 auth_url = 'https://auth.docker.io/token'
-docker_registry_url = 'https://registry-1.docker.io/'
-docker_manifest_url = 'https://registry-1.docker.io/v2/{}/manifests/{}'
 clair_indexer_url = 'http://localhost:6060/indexer/api/v1/index_report'
 clair_matcher_url = 'http://localhost:6060/matcher/api/v1/vulnerability_report/'
 
-def clair_post_manifest(layers: list, reservation: VulnerabilityQueue):
+def clair_post_manifest(layers: list, registry_url: str, reservation: VulnerabilityQueue):
     token = get_auth_token(reservation)
     header = { 'Authorization': [ f'Bearer {token}' ] }
     digest = reservation.digest
@@ -24,7 +23,7 @@ def clair_post_manifest(layers: list, reservation: VulnerabilityQueue):
     _layers = []
     for layer in layers:
         layer_digest = layer['digest']
-        layer_uri = docker_registry_url
+        layer_uri = 'http://' + registry_url
         layer_uri += f'/v2/{repo}/blobs/{layer_digest}'
 
         _layers.append({'hash': layer_digest, 'uri': layer_uri, 'headers': header})
@@ -45,7 +44,9 @@ def clair_get_layers(reservation: VulnerabilityQueue):
     digest = reservation.digest
     repo = reservation.repo_name
 
-    request_url = docker_manifest_url.format(repo, digest)
+    manifest_url = 'http://' + reservation.registry_url + '/v2/{}/manifests/{}'
+
+    request_url = manifest_url.format(repo, digest)
     response = requests.get(request_url, headers=header)
     parsed_res = json.loads(response.content)
 
@@ -61,15 +62,23 @@ def clair_get_layers(reservation: VulnerabilityQueue):
         raise Exception('Cannot get manifest: Unexpected Response.\n' + parsed_res)
 
 def validate_digest(reservation: VulnerabilityQueue):
+    if reservation.is_local_image:
+        validate_local_digest(reservation)
+        return reservation.digest
+
     repo = reservation.repo_name
     digest = reservation.digest
     token = 'Bearer ' + get_auth_token(reservation)
     header = {'Authorization': token}
 
-    request_url = docker_manifest_url.format(repo, digest)
+    manifest_url = 'http://' + reservation.registry_url + '/v2/{}/manifests/{}'
+    request_url = manifest_url.format(repo, digest)
     response = requests.get(request_url, headers=header)
-    if response.status_code == 401:
-        raise HTTPError(response.content)
+    if response.status_code >= 400:
+        reservation.registry_url = 'localhost:5000/'
+        reservation.is_local_image = True
+        validate_local_digest(reservation)
+        return reservation.digest
 
     parsed_res = json.loads(response.content)
     if 'manifests' in parsed_res:
@@ -85,6 +94,16 @@ def validate_digest(reservation: VulnerabilityQueue):
     else:
         raise Exception('Cannot validate digest: Unexpected response' + parsed_res)
 
+def validate_local_digest(reservation: VulnerabilityQueue):
+    # Image Tagging: tag should not include url scheme(e.g., http://)
+    local_image = manage.get_image(reservation.imageId)
+    local_image.tag(reservation.registry_url + reservation.repo_name)
+    manage.push_image(reservation.registry_url + reservation.repo_name)
+
+    local_image = manage.get_image(reservation.imageId)
+    reservation.digest = local_image.attrs['RepoDigests'][0].split('@')[1]
+
+    return reservation.digest
 
 def clair_get_report(digest: str):
     response = requests.get(clair_matcher_url + digest)

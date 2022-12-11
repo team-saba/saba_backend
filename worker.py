@@ -118,7 +118,11 @@ class ReservationWorker:
                 response = requests.get(self.clair_indexer_url + f'/{digest}')
                 if response.status_code == 404:
                     layers = clair.clair_get_layers(reservation)
-                    clair.clair_post_manifest(layers=layers, reservation=reservation)
+                    try:
+                        clair.clair_post_manifest(layers=layers, registry_url=reservation.registry_url, reservation=reservation)
+                    except HTTPError:
+                        clair.clair_post_manifest(layers=layers, registry_url='registry:5000', reservation=reservation)
+
                 elif response.status_code == 500:
                     parsed_response = json.loads(response.content)
                     raise HTTPError(parsed_response)
@@ -171,6 +175,8 @@ class ReservationWorker:
 
         finally:
             self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
+            if reservation.is_local_image:
+                manage.delete_image(reservation.registry_url+reservation.repo_name)
 
         pass
 
