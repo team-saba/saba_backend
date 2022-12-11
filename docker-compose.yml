@@ -1,24 +1,26 @@
 version: "3.8"
 services:
-  saba:
-    image: test/saba:latest
-    container_name: saba
-    build: .
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - .:/app
-    ports:
-     - "8002:8002"
-    env_file:
-      - .env
+  #  saba:
+  #    image: test/saba:latest
+  #    container_name: saba
+  #    build: .
+  #    volumes:
+  #      - /var/run/docker.sock:/var/run/docker.sock:ro
+  #      - .:/app
+  #    ports:
+  #     - "8002:8002"
+  #    env_file:
+  #      - .env
 
   clair:
     restart: always
-    image: quay.io/projectquay/clair:4.5.0
+    image: quay.io/projectquay/clair:4.5.1
     volumes:
       - ./clair/config.yaml:/config/config.yaml
     ports:
       - "6060:6060"
+    environment:
+      CLIAR_MODE: combo
     depends_on:
       - postgres
 
@@ -36,7 +38,12 @@ services:
     restart: always
     container_name: saba-json-mongo
     ports: 
-    - "27017:27017"
+      - "27017:27017"
     volumes:
-    - ./Mongodb/data:/data/db
-    
+      - ./Mongodb/data:/data/db
+
+  registry:
+    restart: always
+    image: registry:2
+    ports:
+      - "5000:5000"

@@ -12,15 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
-http_listen_addr: 0.0.0.0:6060
+http_listen_addr: ":6060"
 log_level: info
+updaters: {}
 indexer:
   connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
   scanlock_retry: 10
   layer_scan_concurrency: 2
   migrations: true
 matcher:
-  indexer_addr: "localhost:6060"
+  indexer_addr: ":6060"
+  disable_updaters: false
   connstring: host=postgres port=5432 user=clair password=password dbname=clair sslmode=disable
   max_conn_pool: 3
   run: ""

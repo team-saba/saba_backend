@@ -77,14 +77,15 @@ class ReservationWorker:
         try:
             # Trivy First
             print("scan")
-            reservation_ticket = manage.scan_image(
-                image_id=reservation.imageId
-            )
 
             reservation.result = []
             cveids = []
 
             if reservation.scan_on_trivy:
+                reservation_ticket = manage.scan_image(
+                    image_id=reservation.imageId
+                )
+
                 # Trivy Data Saving
                 trivy_result = reservation_ticket['scan_result']
                 for t in trivy_result:
@@ -117,17 +118,21 @@ class ReservationWorker:
                 response = requests.get(self.clair_indexer_url + f'/{digest}')
                 if response.status_code == 404:
                     layers = clair.clair_get_layers(reservation)
-                    clair.clair_post_manifest(layers=layers, reservation=reservation)
+                    try:
+                        clair.clair_post_manifest(layers=layers, registry_url=reservation.registry_url, reservation=reservation)
+                    except HTTPError:
+                        clair.clair_post_manifest(layers=layers, registry_url='registry:5000', reservation=reservation)
+
                 elif response.status_code == 500:
                     parsed_response = json.loads(response.content)
                     raise HTTPError(parsed_response)
 
                 clair_result = clair.clair_get_report(digest)
 
-                if clair_result != {}:
+                if clair_result['vulnerabilities'] != {}:
                     cve_format = re.compile('[A-Z]{3}-\\d{4}-\\d{4,7}', re.IGNORECASE)
 
-                    for ck, cv in clair_result.items():
+                    for ck, cv in clair_result['vulnerabilities'].items():
                         parsed_vid = cve_format.search(cv['name'])
 
                         if parsed_vid is not None \
@@ -137,7 +142,15 @@ class ReservationWorker:
                         vid = cv['name']
                         d   = cv['description']
                         p   = cv['package']['name']
-                        s   = cv['severity'] or cv['normalized_severity']
+                        s   = str.upper(cv['normalized_severity'])
+                        if s == 'UNKNOWN':          # Can someone reduce this piles of shit
+                            for ev in clair_result['enrichments'].values():
+                                for evv in ev:
+                                    res = evv.get(ck)
+                                    if res is None:
+                                        s = 'UNKNOWN'
+                                    else:
+                                        s = str.upper(res[0]['baseSeverity'])
                         pi  = cv['package']['version']
                         pix = cv['fixed_in_version']
 
@@ -170,6 +183,8 @@ class ReservationWorker:
 
         finally:
             self.worker_status.delete(f"Vulnerability_{reservation.uuid}", retry=True)
+            if reservation.is_local_image:
+                manage.delete_image(reservation.registry_url+reservation.repo_name)
 
         pass
 
