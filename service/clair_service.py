@@ -115,7 +115,7 @@ def clair_get_report(digest: str):
         error_report = 'clair_get_report: Database or clair server has error; it might be because it is busy.'
         error_report += json.loads(response.content)
         raise HTTPError(error_report)
-    return json.loads(response.content)['vulnerabilities']
+    return json.loads(response.content)
 
 def get_auth_token(rsv: VulnerabilityQueue)->str:
     # request for token of 'ch1keen/pwnable': OK

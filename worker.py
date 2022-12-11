@@ -129,10 +129,10 @@ class ReservationWorker:
 
                 clair_result = clair.clair_get_report(digest)
 
-                if clair_result != {}:
+                if clair_result['vulnerabilities'] != {}:
                     cve_format = re.compile('[A-Z]{3}-\\d{4}-\\d{4,7}', re.IGNORECASE)
 
-                    for ck, cv in clair_result.items():
+                    for ck, cv in clair_result['vulnerabilities'].items():
                         parsed_vid = cve_format.search(cv['name'])
 
                         if parsed_vid is not None \
@@ -142,7 +142,15 @@ class ReservationWorker:
                         vid = cv['name']
                         d   = cv['description']
                         p   = cv['package']['name']
-                        s   = cv['severity'] or cv['normalized_severity']
+                        s   = str.upper(cv['normalized_severity'])
+                        if s == 'UNKNOWN':          # Can someone reduce this piles of shit
+                            for ev in clair_result['enrichments'].values():
+                                for evv in ev:
+                                    res = evv.get(ck)
+                                    if res is None:
+                                        s = 'UNKNOWN'
+                                    else:
+                                        s = str.upper(res[0]['baseSeverity'])
                         pi  = cv['package']['version']
                         pix = cv['fixed_in_version']
 
