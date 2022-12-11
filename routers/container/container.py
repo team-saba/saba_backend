@@ -13,12 +13,6 @@ def read_item():
     containers_json = manage.print_list()
     return {"containers" :containers_json}
 
-#컨테이너 테스트 코드
-@router.post("/testlist")
-def test_container_list():
-    containers_json = manage.test_container_list()
-    return {"containers" :containers_json}
-
 #컨테이너 개별 info
 @router.post("/info")
 def print_log(container: Container):

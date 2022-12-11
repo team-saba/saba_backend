@@ -60,6 +60,7 @@ def print_log(container_id):
     if container is None:
         return None
     container_log_result=[]
+    # State에 대한 Log 정보가 json 속성에서 사라짐..! 
     container_log_result=container.attrs['State']['Log']
     return container_log_result
 
@@ -188,11 +189,6 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 1 or sys.argv[1] == "help":
         help(sys.argv)
-
-    #테스트 코드
-    elif sys.argv[1] == "test_list":
-        container_test_list = test_container_list()
-        print(container_test_list)
 
     elif sys.argv[1] == "list":
         container_list = print_list()
